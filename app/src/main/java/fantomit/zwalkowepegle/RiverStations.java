@@ -94,25 +94,26 @@ public class RiverStations extends RoboActionBarActivity implements RiverStation
     }
 
     public void refreshList() {
+        if(mController.getStations() != null && mController.getStations().size() > 0) {
+            Comparator<Station> RIVER_KM_ORDER = new Comparator<Station>() {
+                public int compare(Station object1, Station object2) {
+                    int res = Double.compare(object2.getStatus().getRiverCourseKm(), object1.getStatus().getRiverCourseKm());
+                    return res;
+                }
+            };
+            Collections.sort(mController.getStations(), RIVER_KM_ORDER);
+            mController.isSorted = true;
 
-        Comparator<Station> RIVER_KM_ORDER = new Comparator<Station>() {
-            public int compare(Station object1, Station object2) {
-                int res = Double.compare(object2.getStatus().getRiverCourseKm(), object1.getStatus().getRiverCourseKm());
-                return res;
+
+            if (mAdapter == null) {
+                mAdapter = new StationListAdapter(this, mController.getStations());
+                mStations.setAdapter(mAdapter);
+            } else {
+                mAdapter.stations = mController.getStations();
             }
-        };
-        Collections.sort(mController.getStations(), RIVER_KM_ORDER);
-        mController.isSorted = true;
-
-
-        if (mAdapter == null) {
-            mAdapter = new StationListAdapter(this, mController.getStations());
-            mStations.setAdapter(mAdapter);
-        } else {
-            mAdapter.stations = mController.getStations();
+            mAdapter.notifyDataSetChanged();
+            hideProgressSpinner();
         }
-        mAdapter.notifyDataSetChanged();
-        hideProgressSpinner();
     }
 
     @Override

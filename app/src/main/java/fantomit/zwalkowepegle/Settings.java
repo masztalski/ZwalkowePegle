@@ -20,6 +20,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.buganalytics.trace.BugAnalytics;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -79,6 +80,7 @@ public class Settings extends RoboActionBarActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mController.wojewodztwo = (String) parent.getAdapter().getItem(position);
                 mController.wojPos = position;
+                BugAnalytics.sendEvent ("Zmiana województwa");
             }
 
             @Override
@@ -146,13 +148,9 @@ public class Settings extends RoboActionBarActivity {
                         mController.readFromFile(file);
                     }
                 });
-                //fileDialog.addDirectoryListener(new FileDialog.DirectorySelectedListener() {
-                //  public void directorySelected(File directory) {
-                //      Log.d(getClass().getName(), "selected dir " + directory.toString());
-                //  }
-                //});
-                //fileDialog.setSelectDirectoryOption(false);
                 fileDialog.showDialog();
+                BugAnalytics.sendEvent("Wczytanie pliku stany.peg");
+                Toast.makeText(Settings.this, "Wczytano plik ze stanami charakterystycznymi. ZatwierdŸ zmiany aby za³adowaæ dane do stacji", Toast.LENGTH_SHORT).show();
             }
         });
 

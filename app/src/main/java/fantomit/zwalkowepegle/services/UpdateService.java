@@ -16,7 +16,9 @@ import com.google.inject.Inject;
 import de.greenrobot.event.EventBus;
 import fantomit.zwalkowepegle.APImodels.ApkVersion;
 import fantomit.zwalkowepegle.ZwalkiApplication;
+import fantomit.zwalkowepegle.interfaces.MainActivityInterface;
 import fantomit.zwalkowepegle.utils.AktualizacjaEvent;
+import fantomit.zwalkowepegle.utils.RetroFitErrorHelper;
 import fantomit.zwalkowepegle.webservices.UpdateWebService;
 import roboguice.service.RoboService;
 import rx.Observable;
@@ -38,6 +40,8 @@ public class UpdateService extends RoboService {
     @Inject UpdateWebService updateWS;
     @Inject
     EventBus eventBus;
+//    @Inject
+//    MainActivityInterface mView;
 
     @Override
     public void onCreate() {
@@ -60,6 +64,7 @@ public class UpdateService extends RoboService {
             Bundle extras = intent.getExtras();
             verName = Double.parseDouble(extras.getString("verName"));
             verCode = extras.getInt("verCode");
+            Log.e("UpdateService" , "Uruchomiony");
 
             Observable<ApkVersion> result = updateWS.getCurrentVersion();
 
@@ -68,20 +73,23 @@ public class UpdateService extends RoboService {
                 public void call(ApkVersion apkVersion) {
                     newVersion = apkVersion;
                     if (apkVersion.getVerName() > verName) {
+                        Log.e("UpdateService", "nowa wersja");
                         eventBus.post(new AktualizacjaEvent(false));
                     } else if (apkVersion.getVerName() == verName && apkVersion.getVerCode() > verCode) {
                         eventBus.post(new AktualizacjaEvent(false));
+                        Log.e("UpdateService", "nowa wersja");
                     }
                 }
-            });
+            }, new RetroFitErrorHelper(null));
         }
 
         return super.onStartCommand(intent, flags, startId);
     }
 
     private void downloadAPK(){
+        Log.e("UpdateService", "Pobieranie APK");
         fileName = "Pegle-" + Double.toString(newVersion.getVerName()) + "B" + Integer.toString(newVersion.getVerCode()) + "-release.apk";
-        String URL = ZwalkiApplication.APK_SOURCE + "/" + fileName;
+        String URL = ZwalkiApplication.APK_SOURCE + fileName;
         String ext = MimeTypeMap.getFileExtensionFromUrl(URL);
         MimeTypeMap mimeMap = MimeTypeMap.getSingleton();
         String mime = mimeMap.getMimeTypeFromExtension(ext);

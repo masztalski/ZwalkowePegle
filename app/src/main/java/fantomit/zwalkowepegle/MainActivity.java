@@ -18,7 +18,6 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.inject.Inject;
-import com.parse.ParseAnalytics;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -58,9 +57,6 @@ public class MainActivity extends RoboActionBarActivity implements MainActivityI
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.e("STATE", "onCreate");
-        if(savedInstanceState == null) {
-            ParseAnalytics.trackAppOpenedInBackground(getIntent());
-        }
         orientation = getRequestedOrientation();
         setContentView(R.layout.simple_list);
         if (eventBus.isRegistered(this)) {

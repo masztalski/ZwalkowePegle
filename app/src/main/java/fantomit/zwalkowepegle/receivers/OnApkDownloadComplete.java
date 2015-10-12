@@ -20,7 +20,7 @@ public class OnApkDownloadComplete extends BroadcastReceiver {
             DownloadManager dMgr = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
             Bundle extras = intent.getExtras();
             if (extras.containsKey(DownloadManager.EXTRA_DOWNLOAD_ID)) {
-                Log.e("DOWNLOAD Completed", Long.toString(extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID)));
+                Log.e("DOWNLOAD Completed", "Aplikacja gotowa do instalacji");
                 Uri result = dMgr.getUriForDownloadedFile(extras.getLong(DownloadManager.EXTRA_DOWNLOAD_ID));
                 if(result.toString().contains("Pegle")) {
                     Intent i = new Intent();

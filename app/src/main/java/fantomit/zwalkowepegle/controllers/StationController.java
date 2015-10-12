@@ -2,6 +2,7 @@ package fantomit.zwalkowepegle.controllers;
 
 import android.util.Log;
 
+import com.buganalytics.trace.BugAnalytics;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
@@ -74,6 +75,7 @@ public class StationController {
     public void addToFavourite(){
         mStacja.setIsFav(true);
         boolean status = repoStacja.createOrUpdate(mStacja);
+        BugAnalytics.sendEvent("Dodano do ulubionych");
         Log.e("ADD ULUBIONE", status ? "Succes" : "Fail");
 //        if(repoStacja.findById(mStacja.getId()) != null) {
 //            Station s = repoStacja.findById(mStacja.getId());

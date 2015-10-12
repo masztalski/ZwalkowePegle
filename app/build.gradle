@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.parse'
 
 android {
     compileSdkVersion 23
@@ -9,8 +8,8 @@ android {
         applicationId "fantomit.zwalkowepegle"
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 13
-        versionName "4.0"
+        versionCode 1
+        versionName "5.0"
     }
 
     compileOptions {
@@ -47,27 +46,12 @@ project.tasks.withType(JavaCompile) { task ->
 buildscript {
     repositories {
         mavenCentral()
-        maven {
-            url 'https://maven.parse.com/repo'
-        }
     }
-    dependencies {
-        classpath 'com.parse.tools:gradle:1.+'
-    }
-}
 
-parse {
-    applicationId "wZJdQMEhzbpktFIBG0lYk8BFPCbCceavDKX2hRNK"
-    masterKey "m33l6aKnC7YzrjGWg0vqPOx3YueGJuLtyVMIBf1J"
-    // This makes it automatic. Otherwise you would have to run e.g. gradlew parseUploadSymbolsRelease.
-    uploadSymbols true
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.parse.bolts:bolts-android:1.+'
-    compile fileTree(include: 'Parse-*.jar', dir: 'libs')
-    compile fileTree(include: 'ParseCrashReporting-*.jar', dir: 'libs')
+    compile fileTree(include: 'buganalytics-*.jar', dir: 'libs')
     compile 'com.android.support:appcompat-v7:23.0.1'
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'org.apache.commons:commons-io:1.3.2'
