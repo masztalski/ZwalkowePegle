@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <com.rey.material.widget.Switch
+        android:id="@+id/notif_switcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/Material.Widget.Switch"
+        android:layout_alignTop="@+id/notif_hint"
+        android:layout_alignBottom="@+id/notif_hint"
+        android:gravity="center"
+        app:sw_thumbColor="@color/accent"/>
+
+    <TextView
+        android:id="@+id/notif_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/notif_switcher"
+        android:layout_marginLeft="5dp"
+        android:text="Powiadomiaj dla progowego przepływu"/>
+
+    <RadioGroup
+        android:id="@+id/statesSwitcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/notif_switcher"
+        android:layout_centerHorizontal="true"
+        android:orientation="vertical">
+        <RadioButton
+            android:id="@+id/llw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LLW"/>
+        <RadioButton
+            android:id="@+id/lw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="LW"/>
+        <RadioButton
+            android:id="@+id/mw1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MW1"/>
+        <RadioButton
+            android:id="@+id/mw2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MW2"/>
+        <RadioButton
+            android:id="@+id/hw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HW"/>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/bClear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/statesSwitcher"
+        android:layout_marginTop="5dp"
+        android:background="@drawable/button_effect"
+        android:text="Przywróć domyślne"/>
+</RelativeLayout>

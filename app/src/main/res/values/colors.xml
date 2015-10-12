@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="up">#8bc34a</color>
+    <color name="down">#f44336</color>
+    <color name="neutral">#90caf9</color>
+    <color name="unknown">#bdbdbd</color>
+    <color name="przeplyw_chart">#ff7043</color>
+    <color name="level_chart">#4caf50</color>
+    <color name="primary">#8bc34a</color>
+    <color name="secondary">#c5e1a5</color>
+    <color name="accent">#e040fb</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+</resources>
