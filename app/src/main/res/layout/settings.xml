@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="20dp"
+                android:focusableInTouchMode="true"
+    >
+
+    <com.rey.material.widget.Switch
+        android:id="@+id/notification_switch"
+        style="@style/Material.Widget.Switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/notif_hint"
+        android:layout_alignBottom="@+id/notif_hint"
+        android:checked="true"
+        android:gravity="center"
+        app:sw_thumbColor="@color/accent"
+        />
+
+    <TextView
+        android:id="@+id/notif_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:layout_marginLeft="5dp"
+        android:text="Włączone powiadomienia o ulubionych"
+        android:layout_toRightOf="@id/notification_switch"
+        />
+
+    <View
+        android:id="@+id/line1"
+        android:layout_below="@id/notif_hint"
+        android:layout_width="fill_parent"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="1dp"
+        android:layout_height="2dp"
+        android:background="#c0c0c0"/>
+
+    <TextView
+        android:id="@+id/woj_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingRight="5dp"
+        android:layout_below="@id/line1"
+        android:layout_alignTop="@+id/wojewodztwo_choose"
+        android:layout_alignBottom="@+id/wojewodztwo_choose"
+        android:text="Wybierz województwo: "
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        />
+
+    <Spinner
+        android:id="@+id/wojewodztwo_choose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/line1"
+        android:layout_toRightOf="@id/woj_hint"
+        />
+
+    <View
+        android:id="@+id/line2"
+        android:layout_below="@id/wojewodztwo_choose"
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="1dp"
+        android:layout_marginBottom="5dp"
+        android:background="#c0c0c0"/>
+
+    <TextView
+        android:id="@+id/time_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingRight="5dp"
+        android:layout_below="@id/line2"
+        android:layout_alignTop="@+id/time_choose"
+        android:layout_alignBottom="@+id/time_choose"
+        android:text="Interwał pobierania ulubionych stacji: "
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:layout_toLeftOf="@id/time_choose"
+        />
+
+    <Spinner
+        android:id="@+id/time_choose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@id/wojewodztwo_choose"
+        android:layout_below="@id/line2"
+        />
+
+    <Button
+        android:id="@+id/addData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_effect"
+        android:text="Załaduj dane"
+        android:layout_alignLeft="@+id/clearFav"
+        android:layout_alignRight="@+id/clearFav"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:layout_below="@id/time_hint"
+        android:layout_centerHorizontal="true"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"
+        android:textStyle="normal"
+        />
+
+
+    <Button
+        android:id="@+id/clearFav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_effect"
+        android:text="Usuń wszystkie ulubione"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:layout_below="@id/addData"
+        android:layout_centerHorizontal="true"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"
+        android:textStyle="normal"
+        />
+
+    <Button
+        android:id="@+id/apply"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/button_effect_accent"
+        android:layout_alignRight="@id/clearFav"
+        android:layout_alignLeft="@id/clearFav"
+        android:text="Zatwierdź zmiany"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:layout_below="@id/clearFav"
+        android:layout_centerHorizontal="true"
+        android:textStyle="normal"
+        />
+
+
+</RelativeLayout>

@@ -1,2 +1,11 @@
-app/build/
-.gradle/
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+.idea/
+ZwalkowePegle.iml
+app/app.iml
+*.apk

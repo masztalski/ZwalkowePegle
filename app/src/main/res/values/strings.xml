@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">Zwałkowe Pegle</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="about">Autor: Michał Markiewicz (Fantom) \n
+        Kontakt: masztalski@gmail.com\n
+        Dane pochodzą z serwisu pogodynka.pl \n \n
+        Pomoc:\n
+        Aby usunąć niechcianą rzekę należy przytrzymać na niej palec a następnie zatwierdzić usunięcie\n
+        Użytkownik może sam ustawić dolne granice pływalności dla wybranej stacji(ikona ołówka)
+        które będą wyświetlane na wykresie oraz będą wyznacznikiem dla powiadomień w przypadku dodania stacji do ulubionych
+    </string>
+
+    <string-array name="provinices_values">
+        <item>dolnośląskie</item>
+        <item>kujawsko-Pomorskie</item>
+        <item>lubelskie</item>
+        <item>lubuskie</item>
+        <item>łódzkie</item>
+        <item>małopolskie</item>
+        <item>mazowieckie</item>
+        <item>opolskie</item>
+        <item>podkarpackie</item>
+        <item>podlaskie</item>
+        <item>pomorskie</item>
+        <item>śląskie</item>
+        <item>świętokrzyskie</item>
+        <item>warmińsko-mazurskie</item>
+        <item>wielkopolskie</item>
+        <item>zachodniopomorskie</item>
+    </string-array>
+
+    <string-array name="interwal">
+        <item>co 15 min.</item>
+        <item>co 30 min.</item>
+        <item>co 1 godzina</item>
+        <item>co 2 godziny</item>
+        <item>co 3 godziny</item>
+    </string-array>
+
+    <string name="id">id</string>
+    <string name="llw_poziom">llw_poziom</string>
+    <string name="llw_przeplyw">llw_przeplyw</string>
+    <string name="lw_poziom">lw_poziom</string>
+    <string name="lw_przeplyw">lw_przeplyw</string>
+    <string name="mw1_poziom">mw1_poziom</string>
+    <string name="mw1_przeplyw">mw1_przeplyw</string>
+    <string name="mw2_poziom">mw2_poziom</string>
+    <string name="mw2_przeplyw">mw2_przeplyw</string>
+    <string name="hw_poziom">hw_poziom</string>
+    <string name="hw_przeplyw">hw_przeplyw</string>
+</resources>
