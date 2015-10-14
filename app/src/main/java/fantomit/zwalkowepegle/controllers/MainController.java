@@ -110,7 +110,8 @@ public class MainController {
                     //Log.e("FANTOM", "test stacji " + mStacja.getName());
                     howManyStationsTested++;
                     if (repoSettings.getSettings().getWojewodztwo().equals(mStacja.getStatus().getProvince())) {
-                        Log.e("SORTED", "Stacja dopasowana do województwa");
+                        Log.e("SORTED", "Stacja " + mStacja.getName() + " dopasowana do województwa");
+                        if(mView != null) mView.displayProgress("Stacja " + mStacja.getName() + " dopasowana do województwa");
                         mWojewodzkieStacje.add(mStacja);
                         if(repoStacja.findById(mStacja.getId()) != null){
                             Station s = repoStacja.findById(station.getId());
@@ -154,15 +155,18 @@ public class MainController {
     private void setWojewodztwo() {
         Log.e("FANTOM", "Set " + repoSettings.getSettings().getWojewodztwo());
         howManyStationsTested = 0;
+        if(mView != null) mView.displayProgress("Trwa ³adowanie danych: Rozpoczynam pobieraæ stacje do posortowania(ok. 600 stacji)");
         for (StationListObject s : mListaStacji) {
             String id = s.getId();
             getStacja(id);
         }
         Log.e("DOWNLOAD", "Downloaded " + Integer.toString(mListaStacji.size()) + " stations");
+        if(mView != null) mView.displayProgress("Trwa ³adowanie danych: Pobrano " + Integer.toString(mListaStacji.size()) + " stacji do posortowania");
     }
 
     private void sortRivers(List<Station> stacje) {
         Log.e("FANTOM", "sortRivers");
+        if(mView != null) mView.displayProgress("Jeszcze chwila, dopasowujê stacje do rzek w wybranym województwie");
         if (stacje.isEmpty()) Log.e("FANTOM", "brak stacji");
         List<Station> customStations = new ArrayList<>();
         List<River> rzeki = new ArrayList<>();

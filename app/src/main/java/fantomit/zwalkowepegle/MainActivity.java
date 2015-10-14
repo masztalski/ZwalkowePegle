@@ -15,9 +15,12 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.inject.Inject;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -228,5 +231,10 @@ public class MainActivity extends RoboActionBarActivity implements MainActivityI
         i.setAction(UpdateReceiver._UPDATE);
         sendBroadcast(i);
         //=====
+    }
+
+    @Override
+    public void displayProgress(String message) {
+        ((TextView)mProgressLayout.findViewById(R.id.progress_Text)).setText("Trwa ³adowanie danych: " + message);
     }
 }

@@ -99,15 +99,15 @@ public class FavsDownloadService extends RoboService {
                         List<PrzeplywRecord> przeplywRecords = station.getDischargeRecords();
                         if (station.isByDefaultCustomized() || station.isUserCustomized()) {
                             if (station.isNotifByPrzeplyw() && przeplywRecords.get(przeplywRecords.size() - 1).getValue() > station.getDolnaGranicaPrzeplywu()) {
-                                sendNotification(station.getId(), station.getName(), "customized");
+                                sendNotification(station.getId(), station.getName(), "customized", przeplywRecords.get(przeplywRecords.size()-1).getValue(), -1);
                             } else if (station.getStatus().getCurrentValue() > station.getDolnaGranicaPoziomu()) {
-                                sendNotification(station.getId(), station.getName(), "customized");
+                                sendNotification(station.getId(), station.getName(), "customized", -1.0, station.getStatus().getCurrentValue());
                             }
                         } else if (!station.isUserCustomized() && !station.isByDefaultCustomized()) {
                             if (station.isNotifByPrzeplyw() && przeplywRecords.get(przeplywRecords.size() - 1).getValue() > station.getLowDischargeValue()) {
-                                sendNotification(station.getId(), station.getName(), "from API-LowVal");
+                                sendNotification(station.getId(), station.getName(), "from API-LowVal", przeplywRecords.get(przeplywRecords.size()-1).getValue(), -1);
                             } else if (station.getStatus().getCurrentValue() > station.getStatus().getLowValue()) {
-                                sendNotification(station.getId(), station.getName(), "from API-LowVal");
+                                sendNotification(station.getId(), station.getName(), "from API-LowVal", -1.0, station.getStatus().getCurrentValue());
                             }
                         }
                     }
@@ -118,12 +118,17 @@ public class FavsDownloadService extends RoboService {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void sendNotification(String id, String name, String typ) {
+    private void sendNotification(String id, String name, String typ, double dVal, int iVal) {
         Log.e("FANTOM", "wys³ano ¿¹danie o powiadomieniu " + typ);
         Intent i = new Intent();
         i.setAction(NotificationReceiver._KEY);
         i.putExtra(NotificationReceiver._ID, id);
         i.putExtra(NotificationReceiver._NAME, name);
+        if(dVal != -1){
+            i.putExtra(NotificationReceiver._dVAL, dVal);
+        } else {
+            i.putExtra(NotificationReceiver._iVAL, iVal);
+        }
         sendBroadcast(i);
     }
 }

@@ -89,7 +89,7 @@ public class UpdateService extends RoboService {
     private void downloadAPK(){
         Log.e("UpdateService", "Pobieranie APK");
         fileName = "Pegle-" + Double.toString(newVersion.getVerName()) + "B" + Integer.toString(newVersion.getVerCode()) + "-release.apk";
-        String URL = ZwalkiApplication.APK_SOURCE + fileName;
+        String URL = ZwalkiApplication.APK_SOURCE + '/' + fileName;
         String ext = MimeTypeMap.getFileExtensionFromUrl(URL);
         MimeTypeMap mimeMap = MimeTypeMap.getSingleton();
         String mime = mimeMap.getMimeTypeFromExtension(ext);

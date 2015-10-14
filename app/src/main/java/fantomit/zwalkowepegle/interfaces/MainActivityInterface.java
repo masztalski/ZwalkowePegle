@@ -7,4 +7,5 @@ public interface MainActivityInterface extends MainInterface {
     Date getToday();
     void displayAktualizacjaDialog();
     void runAktualizacjaService();
+    void displayProgress(String message);
 }

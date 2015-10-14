@@ -53,10 +53,18 @@ public class EditCustomStationDialog extends RoboDialogFragment {
 
         String idStation = getArguments().getString("ID");
         station = repoStation.findById(idStation);
+        if(station.isNotifByPrzeplyw()){
+            notifSwitcher.setChecked(false);
+            notifHint.setText("Powiadomiaj dla progowego przep³ywu");
+        } else {
+            notifSwitcher.setChecked(true);
+            notifHint.setText("Powiadomiaj dla progowego poziomu");
+        }
 
         notifSwitcher.setOnCheckedChangeListener(new Switch.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(Switch view, boolean checked) {
+                statesSwitcher.check(station.getNotifCheckedId());
                 if(checked){
                     notifHint.setText("Powiadomiaj dla progowego poziomu");
                     station.setNotifByPrzeplyw(false);
@@ -91,7 +99,7 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                     switch (checkedId) {
                         case R.id.llw:
                             station.setNotifHint("LLW");
-                            if (station.isNotifByPrzeplyw()) {
+                            if (!station.isNotifByPrzeplyw()) {
                                 station.setDolnaGranicaPoziomu(station.getLlw_poziom());
                             } else {
                                 station.setDolnaGranicaPrzeplywu(station.getLlw_przeplyw());
@@ -99,7 +107,7 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                             break;
                         case R.id.lw:
                             station.setNotifHint("LW");
-                            if (station.isNotifByPrzeplyw()) {
+                            if (!station.isNotifByPrzeplyw()) {
                                 station.setDolnaGranicaPoziomu(station.getLw_poziom());
                             } else {
                                 station.setDolnaGranicaPrzeplywu(station.getLw_przeplyw());
@@ -107,7 +115,7 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                             break;
                         case R.id.mw1:
                             station.setNotifHint("MW1");
-                            if (station.isNotifByPrzeplyw()) {
+                            if (!station.isNotifByPrzeplyw()) {
                                 station.setDolnaGranicaPoziomu(station.getMw1_poziom());
                             } else {
                                 station.setDolnaGranicaPrzeplywu(station.getMw1_przeplyw());
@@ -115,7 +123,7 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                             break;
                         case R.id.mw2:
                             station.setNotifHint("MW2");
-                            if (station.isNotifByPrzeplyw()) {
+                            if (!station.isNotifByPrzeplyw()) {
                                 station.setDolnaGranicaPoziomu(station.getMw2_poziom());
                             } else {
                                 station.setDolnaGranicaPrzeplywu(station.getMw2_przeplyw());
@@ -123,7 +131,7 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                             break;
                         case R.id.hw:
                             station.setNotifHint("HW");
-                            if (station.isNotifByPrzeplyw()) {
+                            if (!station.isNotifByPrzeplyw()) {
                                 station.setDolnaGranicaPoziomu(station.getHw_poziom());
                             } else {
                                 station.setDolnaGranicaPrzeplywu(station.getHw_przeplyw());
@@ -131,7 +139,7 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                             break;
                         default:
                             station.setNotifHint("LLW");
-                            if (station.isNotifByPrzeplyw()) {
+                            if (!station.isNotifByPrzeplyw()) {
                                 station.setDolnaGranicaPoziomu(station.getLlw_poziom());
                             } else {
                                 station.setDolnaGranicaPrzeplywu(station.getLlw_przeplyw());

@@ -145,12 +145,12 @@ public class Settings extends RoboActionBarActivity {
                 fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
                     public void fileSelected(File file) {
                         Log.e(getClass().getName(), "selected file " + file.toString());
+                        Toast.makeText(Settings.this, "Wczytano plik ze stanami charakterystycznymi. ZatwierdŸ zmiany aby za³adowaæ dane do stacji", Toast.LENGTH_SHORT).show();
                         mController.readFromFile(file);
                     }
                 });
                 fileDialog.showDialog();
                 BugAnalytics.sendEvent("Wczytanie pliku stany.peg");
-                Toast.makeText(Settings.this, "Wczytano plik ze stanami charakterystycznymi. ZatwierdŸ zmiany aby za³adowaæ dane do stacji", Toast.LENGTH_SHORT).show();
             }
         });
 
