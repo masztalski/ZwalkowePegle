@@ -2,6 +2,7 @@ package fantomit.zwalkowepegle.controllers;
 
 import android.util.Log;
 
+import com.annimon.stream.Stream;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -58,10 +59,10 @@ public class MainController {
 
     public void setView(MainActivityInterface mView) {
         this.mView = mView;
-        if(!eventBus.isRegistered(this)){
+        if (!eventBus.isRegistered(this)) {
             eventBus.register(this);
         }
-        if(repoSettings.getSettings() == null) {
+        if (repoSettings.getSettings() == null) {
             repoSettings.createOrUpdate(new Settings());
         }
     }
@@ -69,7 +70,7 @@ public class MainController {
     public void getListaStacji() {
         mView.showProgressSpinner();
         mRivers = repoRiver.getAll();
-        if (mRivers == null || mRivers.isEmpty() || repoSettings.getSettings().isHasWojewodztwoChanged() ) {
+        if (mRivers == null || mRivers.isEmpty() || repoSettings.getSettings().isHasWojewodztwoChanged()) {
             mRivers.clear();
             repoRiver.deleteAll();
             isDivided = false;
@@ -111,12 +112,13 @@ public class MainController {
                     howManyStationsTested++;
                     if (repoSettings.getSettings().getWojewodztwo().equals(mStacja.getStatus().getProvince())) {
                         Log.e("SORTED", "Stacja " + mStacja.getName() + " dopasowana do województwa");
-                        if(mView != null) mView.displayProgress("Stacja " + mStacja.getName() + " dopasowana do województwa");
+                        if (mView != null)
+                            mView.displayProgress("Stacja " + mStacja.getName() + " dopasowana do województwa");
                         mWojewodzkieStacje.add(mStacja);
-                        if(repoStacja.findById(mStacja.getId()) != null){
+                        if (repoStacja.findById(mStacja.getId()) != null) {
                             Station s = repoStacja.findById(station.getId());
                             station.setIsFav(s.isFav());
-                            if(s.isUserCustomized()) {
+                            if (s.isUserCustomized()) {
                                 station.setIsUserCustomized(true);
                                 station.setDolnaGranicaPoziomu(s.getDolnaGranicaPoziomu());
                                 station.setDolnaGranicaPrzeplywu(s.getDolnaGranicaPrzeplywu());
@@ -128,18 +130,18 @@ public class MainController {
                         }
                         repoStacja.createOrUpdate(mStacja);
                     }
-                    int progress = (howManyStationsTested/mListaStacji.size())*100;
-                    if(progress == 25){
-                        Log.e("TESTED:" , "25%");
+                    int progress = (howManyStationsTested / mListaStacji.size()) * 100;
+                    if (progress == 25) {
+                        Log.e("TESTED:", "25%");
                     }
-                    if(progress == 50){
-                        Log.e("TESTED:" , "50%");
+                    if (progress == 50) {
+                        Log.e("TESTED:", "50%");
                     }
-                    if(progress == 75){
-                        Log.e("TESTED:" , "75%");
+                    if (progress == 75) {
+                        Log.e("TESTED:", "75%");
                     }
-                    if(progress == 100){
-                        Log.e("TESTED:" , "100%");
+                    if (progress == 100) {
+                        Log.e("TESTED:", "100%");
                     }
 
                     if (howManyStationsTested == mListaStacji.size()) {
@@ -155,46 +157,45 @@ public class MainController {
     private void setWojewodztwo() {
         Log.e("FANTOM", "Set " + repoSettings.getSettings().getWojewodztwo());
         howManyStationsTested = 0;
-        if(mView != null) mView.displayProgress("Trwa ³adowanie danych: Rozpoczynam pobieraæ stacje do posortowania(ok. 600 stacji)");
-        for (StationListObject s : mListaStacji) {
-            String id = s.getId();
-            getStacja(id);
-        }
+        if (mView != null)
+            mView.displayProgress("Trwa ³adowanie danych: Rozpoczynam pobieraæ stacje do posortowania(ok. 600 stacji)");
+        Stream.of(mListaStacji)
+                .forEach((StationListObject s) -> getStacja(s.getId()));
         Log.e("DOWNLOAD", "Downloaded " + Integer.toString(mListaStacji.size()) + " stations");
-        if(mView != null) mView.displayProgress("Trwa ³adowanie danych: Pobrano " + Integer.toString(mListaStacji.size()) + " stacji do posortowania");
+        if (mView != null)
+            mView.displayProgress("Trwa ³adowanie danych: Pobrano " + Integer.toString(mListaStacji.size()) + " stacji do posortowania");
     }
 
     private void sortRivers(List<Station> stacje) {
         Log.e("FANTOM", "sortRivers");
-        if(mView != null) mView.displayProgress("Jeszcze chwila, dopasowujê stacje do rzek w wybranym województwie");
+        if (mView != null)
+            mView.displayProgress("Jeszcze chwila, dopasowujê stacje do rzek w wybranym województwie");
         if (stacje.isEmpty()) Log.e("FANTOM", "brak stacji");
         List<Station> customStations = new ArrayList<>();
         List<River> rzeki = new ArrayList<>();
         List<String> nazwyRzek = new ArrayList<>();
-        for (Station stacja : stacje) {
-            String riverName = stacja.getStatus().getRiver();
-            if (!nazwyRzek.contains(riverName)) {
-                River r = new River();
-                r.setRiverName(riverName);
-                r.addConnectedStation(stacja.getId());
-                //Custom data
-
-                //End of Custom data
-                r.setTrend(stacja.getTrend());
-                nazwyRzek.add(riverName);
-                rzeki.add(r);
-            } else {
-                int i = 0;
-                for (River r : rzeki) {
-                    if (r.getRiverName().equals(riverName)) {
+        Stream.of(stacje)
+                .forEach(stacja -> {
+                    String riverName = stacja.getStatus().getRiver();
+                    if (!nazwyRzek.contains(riverName)) {
+                        River r = new River();
+                        r.setRiverName(riverName);
                         r.addConnectedStation(stacja.getId());
                         r.setTrend(stacja.getTrend());
-                        rzeki.set(i, r);
+                        nazwyRzek.add(riverName);
+                        rzeki.add(r);
+                    } else {
+                        int i = 0;
+                        for (River r : rzeki) {
+                            if (r.getRiverName().equals(riverName)) {
+                                r.addConnectedStation(stacja.getId());
+                                r.setTrend(stacja.getTrend());
+                                rzeki.set(i, r);
+                            }
+                            i++;
+                        }
                     }
-                    i++;
-                }
-            }
-        }
+                });
         nazwyRzek.clear();
         if (!rzeki.isEmpty()) Log.e("FANTOM", "sortRivers-Succes");
         Log.e("ILOSC RZEK w " + repoSettings.getSettings().getWojewodztwo(), Integer.toString(rzeki.size()));
@@ -203,13 +204,6 @@ public class MainController {
         for (River r : rzeki) {
             repoRiver.createOrUpdate(r);
         }
-
-//        for(River r : rzeki){
-//            Log.e("RZEKI DS", r.getRiverName());
-//            for(String id : r.getConnectedStations()){
-//                Log.e(r.getRiverName(), id);
-//            }
-//        }
     }
 
 
@@ -217,29 +211,29 @@ public class MainController {
         return mRivers;
     }
 
-    public void onEvent(UsuwanieRzekiEvent event){
+    public void onEvent(UsuwanieRzekiEvent event) {
         boolean czyUsunac = event.czyUsunac();
-        if(czyUsunac){
+        if (czyUsunac) {
             repoRiver.delete(mRivers.get(event.getRiverPos()));
             mRivers = repoRiver.getAll();
             mView.displayRivers();
         }
     }
 
-    public String getWojewodztwoFromSettings(){
+    public String getWojewodztwoFromSettings() {
         return repoSettings.getSettings().getWojewodztwo();
     }
 
-    public boolean hasWojewodztwoChanged(){
+    public boolean hasWojewodztwoChanged() {
         return repoSettings.getSettings().isHasWojewodztwoChanged();
     }
 
-    public void getStationsFromDb(){
+    public void getStationsFromDb() {
         stations = repoStacja.getAll();
     }
 
-    public void onEvent(AktualizacjaEvent event){
-        if(!event.czyPobrac()){
+    public void onEvent(AktualizacjaEvent event) {
+        if (!event.czyPobrac()) {
             mView.displayAktualizacjaDialog();
         }
     }

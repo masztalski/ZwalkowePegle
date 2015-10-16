@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.internal.view.menu.ActionMenuItem;
 import android.text.Html;
 import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +32,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import de.greenrobot.event.EventBus;
 import fantomit.zwalkowepegle.APImodels.PrzeplywRecord;
@@ -67,10 +70,12 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
     private MenuItem mFavButton;
     @InjectView(R.id.level_switches)
     private RadioGroup mLevelSwitches;
+    @Nullable
     @InjectView(R.id.level_switches2)
     private RadioGroup mLevelSwitches2;
     @InjectView(R.id.przeplyw_switches)
     private RadioGroup mPrzeplywSwitches;
+    @Nullable
     @InjectView(R.id.przeplyw_switches2)
     private RadioGroup mPrzeplywSwitches2;
 

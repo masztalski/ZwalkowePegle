@@ -55,10 +55,13 @@ public class RiverStationsController {
                 if(repoStacja.findById(station.getId()) != null){
                     Station s = repoStacja.findById(station.getId());
                     station.setIsFav(s.isFav());
-                    if(s.isUserCustomized()) {
+                    station.setNotifByPrzeplyw(s.isNotifByPrzeplyw());
+                    station.setNotifHint(s.getNotifHint());
+                    station.setNotifCheckedId(s.getNotifCheckedId());
+                    station.setDolnaGranicaPoziomu(s.getDolnaGranicaPoziomu());
+                    station.setDolnaGranicaPrzeplywu(s.getDolnaGranicaPrzeplywu());
+                    if (s.isUserCustomized()) {
                         station.setIsUserCustomized(true);
-                        station.setDolnaGranicaPoziomu(s.getDolnaGranicaPoziomu());
-                        station.setDolnaGranicaPrzeplywu(s.getDolnaGranicaPrzeplywu());
                         station.setLlw_poziom(s.getLlw_poziom());
                         station.setLlw_przeplyw(s.getLlw_przeplyw());
                         station.setLw_poziom(s.getLw_poziom());

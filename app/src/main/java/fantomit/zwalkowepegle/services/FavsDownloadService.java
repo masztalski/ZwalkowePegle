@@ -7,10 +7,12 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.annimon.stream.Stream;
 import com.google.inject.Inject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -72,11 +74,9 @@ public class FavsDownloadService extends RoboService {
         if (isNotificationEnabled) {
             List<Station> stations = repoStacja.getAll();
             List<String> favIds = new ArrayList<>();
-            for (Station s : stations) {
-                if (s.isFav()) {
-                    favIds.add(s.getId());
-                }
-            }
+            Stream.of(stations)
+                    .filter(station -> station.isFav())
+                    .forEach(station -> favIds.add(station.getId()));
 
             for (String id : favIds) {
                 Observable<Station> result = stacjaWS.getStacja(id);
