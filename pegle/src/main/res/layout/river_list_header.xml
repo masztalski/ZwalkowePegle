@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="horizontal"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/secondary">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:paddingLeft="16dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:gravity="center_vertical"
+        android:text="Nazwa rzeki"
+        android:id="@+id/tvNameHeader"
+        />
+
+    <TextView
+        android:id="@+id/tvPlywalnoscHeader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:layout_marginRight="24dp"
+        android:text="Pływalne"
+        android:visibility="gone"
+        android:layout_marginEnd="24dp"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@+id/tvRiverIdHeader"
+        android:layout_toStartOf="@+id/tvRiverIdHeader" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:paddingRight="16dp"
+        android:layout_alignBottom="@id/tvNameHeader"
+        android:layout_alignTop="@id/tvNameHeader"
+        android:layout_alignParentRight="true"
+        android:text="ID rzeki"
+        android:id="@+id/tvRiverIdHeader"
+        />
+    <!--dla TextView: android:layout_weight="3" !-->
+
+    <!--
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_weight="1.5"
+        android:id="@+id/iconTrend"
+        />
+    !-->
+</RelativeLayout>
