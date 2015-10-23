@@ -6,6 +6,9 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
@@ -16,7 +19,7 @@ public class NotificationReceiver extends BroadcastReceiver {
     public static final String _KEY = "notify";
     public static final String _ID = "ID";
     public static final String _NAME = "name";
-    public static final String _dVAL = "iValue";
+    public static final String _dVAL = "dValue";
     public static final String _iVAL = "iValue";
 
     private boolean czyPoziom;
@@ -38,6 +41,8 @@ public class NotificationReceiver extends BroadcastReceiver {
 
         PendingIntent contentIntent = PendingIntent.getActivity(context, id, new Intent(context, MainActivity.class), 0);
 
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+
         long[] pattern = {2,1000,500,2000,500,3000};
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_water_white_36dp)
@@ -45,7 +50,9 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setContentText(czyPoziom ? "Jest " + Integer.toString(poziom) + " cm" : "Jest " + Double.toString(przeplyw) + " m3/s")
                 .setContentIntent(contentIntent)
                 .setVibrate(pattern)
-                .setDefaults(Notification.DEFAULT_VIBRATE)
+                .setLights(Color.RED, 3000, 3000)
+                .setSound(alarmSound)
+                .setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND)
                 .setAutoCancel(true);
 
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

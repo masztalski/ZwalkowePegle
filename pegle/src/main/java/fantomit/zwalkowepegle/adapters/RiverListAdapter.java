@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.HashMap;
 import java.util.List;
 
 import fantomit.zwalkowepegle.DBmodels.River;
@@ -16,13 +17,13 @@ import fantomit.zwalkowepegle.R;
 public class RiverListAdapter extends ArrayAdapter<River> {
     public List<River> rivers;
     private LayoutInflater inflater;
-    private int[] ileStacjiPlywalnych;
+    public HashMap<String,Integer> plywalnosc;
 
-    public RiverListAdapter(Context context, List<River> rivers/*, int[] ileStacjiPlywalnych*/){
+    public RiverListAdapter(Context context, List<River> rivers, HashMap<String,Integer> plywalnosc){
         super(context, R.layout.river_list_item, rivers);
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.rivers = rivers;
-        //this.ileStacjiPlywalnych = ileStacjiPlywalnych;
+        this.plywalnosc = plywalnosc;
     }
 
     @Override
@@ -47,8 +48,12 @@ public class RiverListAdapter extends ArrayAdapter<River> {
 
         riverHolder.mRiverId.setText(r.getRiverId());
         riverHolder.mRiver.setText(r.getRiverShort());
-        riverHolder.mRiverPlywalnosc.setVisibility(View.GONE);
-        //riverHolder.mRiverPlywalnosc.setText(Integer.toString(ileStacjiPlywalnych[position]) + "/" + Integer.toString(r.getConnectedStations().size()));
+        //riverHolder.mRiverPlywalnosc.setVisibility(View.GONE);
+        if(plywalnosc.get(r.getRiverId()) != null) {
+            riverHolder.mRiverPlywalnosc.setText(Integer.toString(plywalnosc.get(r.getRiverId())) + "/" + Integer.toString(r.getConnectedStations().size()));
+        } else {
+            riverHolder.mRiverPlywalnosc.setText("-" + "/" + Integer.toString(r.getConnectedStations().size()));
+        }
 
 //        String trend = r.getTrend();
 //        if(trend.equals("const")){

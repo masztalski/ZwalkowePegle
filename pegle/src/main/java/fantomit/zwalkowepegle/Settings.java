@@ -52,6 +52,10 @@ public class Settings extends RoboActionBarActivity {
     private TextView notif_hint;
     @InjectView(R.id.addData)
     private Button addData;
+    @InjectView(R.id.defStates_hint)
+    private TextView defStates_hint;
+    @InjectView(R.id.defStates_switch)
+    private Switch defStates_switch;
 
     @Inject
     private SettingsController mController;
@@ -167,6 +171,16 @@ public class Settings extends RoboActionBarActivity {
                 finish();
             }
         );
+
+        defStates_switch.setOnCheckedChangeListener((Switch aSwitch, boolean checked) -> {
+            if(checked){
+                defStates_hint.setText("W³¹czone stany charakterystyczne z Pogodynki");
+                mController.stanyPogodynkaEnabled = true;
+            } else {
+                defStates_hint.setText("Wy³¹czone stany charakterystyczne z Pogodynki");
+                mController.stanyPogodynkaEnabled = false;
+            }
+        });
     }
 
     @Override
@@ -194,6 +208,12 @@ public class Settings extends RoboActionBarActivity {
         fantomit.zwalkowepegle.DBmodels.Settings set = mController.getSettings();
         spinWojewodztwa.setSelection(set.getWojPos());
         notification_switch.setChecked(set.isNotificationEnabled());
+        defStates_switch.setChecked(set.isStanyPogodynkaEnabled());
+        if(set.isStanyPogodynkaEnabled()){
+            defStates_hint.setText("W³¹czone stany charakterystyczne z Pogodynki");
+        } else {
+            defStates_hint.setText("Wy³¹czone stany charakterystyczne z Pogodynki");
+        }
         if (set.isNotificationEnabled()) {
             notif_hint.setText("W³¹czone powiadomienia o ulubionych");
         } else {

@@ -15,6 +15,7 @@ import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.APImodels.StationListObject;
 import fantomit.zwalkowepegle.DBmodels.River;
 import fantomit.zwalkowepegle.DBmodels.Settings;
+import fantomit.zwalkowepegle.R;
 import fantomit.zwalkowepegle.db.repositories.RiverRepository;
 import fantomit.zwalkowepegle.db.repositories.SettingsRepository;
 import fantomit.zwalkowepegle.db.repositories.StationRepository;
@@ -27,6 +28,7 @@ import fantomit.zwalkowepegle.webservices.ListaStacjiWebService;
 import fantomit.zwalkowepegle.webservices.MyWebService;
 import fantomit.zwalkowepegle.webservices.StacjaWebService;
 import rx.Observable;
+import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
@@ -110,9 +112,9 @@ public class MainController {
                     //Log.e("FANTOM", "test stacji " + mStacja.getName());
                     howManyStationsTested++;
                     if (repoSettings.getSettings().getWojewodztwo().equals(mStacja.getStatus().getProvince())) {
-                        Log.e("SORTED", "Stacja " + mStacja.getName() + " dopasowana do wojew�dztwa");
+                        Log.e("SORTED", "Stacja " + mStacja.getName() + " dopasowana");
                         if (mView != null)
-                            mView.displayProgress("Stacja " + mStacja.getName() + " dopasowana do wojew�dztwa");
+                            mView.displayProgress(0, "Stacja " + mStacja.getName() + " dopasowana");
                         mWojewodzkieStacje.add(mStacja);
                         if (repoStacja.findById(mStacja.getId()) != null) {
                             Station s = repoStacja.findById(station.getId());
@@ -132,6 +134,10 @@ public class MainController {
                                 Double temp = new Double(s.getStatus().getLowValue());
                                 station.setDolnaGranicaPoziomu(s.getLw_poziom() != -1 ? s.getLw_poziom() : temp.intValue());
                             }
+                        } else {
+                            Double temp = new Double(station.getStatus().getLowValue());
+                            station.setDolnaGranicaPoziomu(temp.intValue());
+                            station.setDolnaGranicaPrzeplywu(station.getLowDischargeValue());
                         }
                         repoStacja.createOrUpdate(mStacja);
                     }
@@ -163,18 +169,18 @@ public class MainController {
         Log.e("FANTOM", "Set " + repoSettings.getSettings().getWojewodztwo());
         howManyStationsTested = 0;
         if (mView != null)
-            mView.displayProgress("Trwa �adowanie danych: Rozpoczynam pobiera� stacje do posortowania(ok. 600 stacji)");
+            mView.displayProgress(R.string.msg_setWojewodztwo, null);
         Stream.of(mListaStacji)
                 .forEach((StationListObject s) -> getStacja(s.getId()));
         Log.e("DOWNLOAD", "Downloaded " + Integer.toString(mListaStacji.size()) + " stations");
         if (mView != null)
-            mView.displayProgress("Trwa �adowanie danych: Pobrano " + Integer.toString(mListaStacji.size()) + " stacji do posortowania");
+            mView.displayProgress(0, "Pobrano " + Integer.toString(mListaStacji.size()) + " stacji do posortowania");
     }
 
     private void sortRivers(List<Station> stacje) {
         Log.e("FANTOM", "sortRivers");
         if (mView != null)
-            mView.displayProgress("Jeszcze chwila, dopasowuj� stacje do rzek w wybranym wojew�dztwie");
+            mView.displayProgress(R.string.msg_SortRivers, null);
         if (stacje.isEmpty()) Log.e("FANTOM", "brak stacji");
         List<Station> customStations = new ArrayList<>();
         List<River> rzeki = new ArrayList<>();
@@ -238,6 +244,32 @@ public class MainController {
         if (!event.czyPobrac()) {
             mView.displayAktualizacjaDialog();
         }
+    }
+
+    public HashMap checkPlywalnosc() {
+        Log.e("PLYWALNOSC", "STARTED");
+        HashMap<String, Integer> plywalnoscRzek = new HashMap<>();
+        List<StationListObject> listaStacji = listaWS.getListaStacji().toBlocking().first();
+
+        Stream.of(mRivers)
+                .forEach(river -> {
+                    List<String> connectedStations = river.getConnectedStations();
+                    int i = 0;
+                    for (StationListObject station : listaStacji) {
+                        if (connectedStations.contains(station.getId())) {
+                            if(repoStacja.findById(station.getId()) != null) {
+                                if (station.getPoziom() >= repoStacja.findById(station.getId()).getDolnaGranicaPoziomu()) {
+                                    i++;
+                                    plywalnoscRzek.put(river.getRiverId(), i);
+                                } else {
+                                    plywalnoscRzek.put(river.getRiverId(), i);
+                                }
+                            }
+                        }
+                    }
+                });
+        Log.e("PLYWALNOSC", "COMPLETED");
+        return plywalnoscRzek;
     }
 
 }

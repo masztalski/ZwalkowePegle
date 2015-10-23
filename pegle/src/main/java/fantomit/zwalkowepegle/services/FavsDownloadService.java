@@ -98,9 +98,9 @@ public class FavsDownloadService extends RoboService {
                         }
                         List<PrzeplywRecord> przeplywRecords = station.getDischargeRecords();
 
-                            if (station.isNotifByPrzeplyw() && przeplywRecords.get(przeplywRecords.size() - 1).getValue() > station.getDolnaGranicaPrzeplywu()) {
+                            if (station.isNotifByPrzeplyw() && przeplywRecords.get(przeplywRecords.size() - 1).getValue() >= station.getDolnaGranicaPrzeplywu()) {
                                 sendNotification(station.getId(), station.getName(), "przep³yw > " + Double.toString(station.getDolnaGranicaPrzeplywu()), przeplywRecords.get(przeplywRecords.size()-1).getValue(), -1);
-                            } else if (!station.isNotifByPrzeplyw() && station.getStatus().getCurrentValue() > station.getDolnaGranicaPoziomu()) {
+                            } else if (!station.isNotifByPrzeplyw() && station.getStatus().getCurrentValue() >= station.getDolnaGranicaPoziomu()) {
                                 sendNotification(station.getId(), station.getName(), "poziom > " + Integer.toString(station.getDolnaGranicaPoziomu()), -1.0, station.getStatus().getCurrentValue());
                             }
 //                        } else if (!station.isUserCustomized() && !station.isByDefaultCustomized()) {

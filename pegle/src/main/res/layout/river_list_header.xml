@@ -24,7 +24,6 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:layout_marginRight="24dp"
         android:text="Pływalne"
-        android:visibility="gone"
         android:layout_marginEnd="24dp"
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@+id/tvRiverIdHeader"

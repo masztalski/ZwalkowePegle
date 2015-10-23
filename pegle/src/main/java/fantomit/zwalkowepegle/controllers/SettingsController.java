@@ -30,6 +30,7 @@ public class SettingsController {
     public int timeOfDownloading = 30;
     public String wojewodztwo = "dolnoœl¹skie";
     public int wojPos = 0;
+    public boolean stanyPogodynkaEnabled = false;
     private static int id = 1;
 
     private Settings settings;
@@ -47,6 +48,7 @@ public class SettingsController {
     public void saveSettings(){
         settings.setNotificationEnabled(notificationEnabled);
         settings.setTime(timeOfDownloading);
+        settings.setStanyPogodynkaEnabled(stanyPogodynkaEnabled);
         if(wojewodztwo.equals(repoSettings.getSettings().getWojewodztwo())){
             settings.setHasWojewodztwoChanged(false);
         } else {

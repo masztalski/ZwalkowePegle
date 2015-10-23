@@ -168,6 +168,14 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
         if(mController.getStacja().getHw_przeplyw() == -1){
             mPrzeplywSwitches.findViewById(R.id.hw_przeplyw).setVisibility(View.GONE);
         }
+        if(!mController.pogodynkaStatesEnabled()){
+            mLevelSwitches.findViewById(R.id.lw_level).setVisibility(View.GONE);
+            mLevelSwitches.findViewById(R.id.mw2_level).setVisibility(View.GONE);
+            mLevelSwitches.findViewById(R.id.hw_level).setVisibility(View.GONE);
+            mPrzeplywSwitches.findViewById(R.id.lw_przeplyw).setVisibility(View.GONE);
+            mPrzeplywSwitches.findViewById(R.id.mw2_przeplyw).setVisibility(View.GONE);
+            mPrzeplywSwitches.findViewById(R.id.hw_przeplyw).setVisibility(View.GONE);
+        }
         Log.e("FANTOM", mController.getStacja().getName() + " - loadView");
         getSupportActionBar().setTitle(mController.getStacja().getName());
         String date = mController.getStacja().getStatus().getCurrentDate();

@@ -19,6 +19,7 @@ import fantomit.zwalkowepegle.APImodels.PrzeplywRecord;
 import fantomit.zwalkowepegle.APImodels.StateRecord;
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.R;
+import fantomit.zwalkowepegle.db.repositories.SettingsRepository;
 import fantomit.zwalkowepegle.db.repositories.StationRepository;
 import fantomit.zwalkowepegle.interfaces.StationDetailsInterface;
 import fantomit.zwalkowepegle.utils.RetroFitErrorHelper;
@@ -36,6 +37,8 @@ public class StationController {
     private StationDetailsInterface mView;
     @Inject
     private StationRepository repoStacja;
+    @Inject
+    private SettingsRepository repoSettings;
 
     @Inject
     private EventBus eventBus;
@@ -70,5 +73,9 @@ public class StationController {
         mStacja.setIsFav(false);
         boolean status = repoStacja.createOrUpdate(mStacja);
         Log.e("DELETE ULUBIONE", status ? "Succes" : "Fail");
+    }
+
+    public boolean pogodynkaStatesEnabled(){
+        return repoSettings.getSettings().isStanyPogodynkaEnabled();
     }
 }

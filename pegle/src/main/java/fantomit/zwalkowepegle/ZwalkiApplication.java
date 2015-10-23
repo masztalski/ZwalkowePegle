@@ -3,6 +3,7 @@ package fantomit.zwalkowepegle;
 import android.app.Application;
 
 import com.buganalytics.trace.BugAnalytics;
+import com.splunk.mint.Mint;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -24,6 +25,7 @@ public class ZwalkiApplication extends Application {
         super.onCreate();
         if(!BuildConfig.DEBUG) {
             BugAnalytics.setup(this, BUGANALYTICS_KEY);
+            Mint.initAndStartSession(this, "81382ab4");
         }
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
         RoboGuice.getOrCreateBaseApplicationInjector

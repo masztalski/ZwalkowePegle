@@ -17,6 +17,8 @@ public class Settings {
     private int time = 30;
     @DatabaseField
     private int wojPos = 0;
+    @DatabaseField
+    private boolean stanyPogodynkaEnabled = false;
 
     public Settings() {}
 
@@ -60,5 +62,13 @@ public class Settings {
 
     public void setHasWojewodztwoChanged(boolean hasWojewodztwoChanged) {
         this.hasWojewodztwoChanged = hasWojewodztwoChanged;
+    }
+
+    public boolean isStanyPogodynkaEnabled() {
+        return stanyPogodynkaEnabled;
+    }
+
+    public void setStanyPogodynkaEnabled(boolean stanyPogodynkaEnabled) {
+        this.stanyPogodynkaEnabled = stanyPogodynkaEnabled;
     }
 }

@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 
 import de.greenrobot.event.EventBus;
 import fantomit.zwalkowepegle.DBmodels.River;
@@ -169,10 +170,12 @@ public class MainActivity extends RoboActionBarActivity implements MainActivityI
         }
 
         if (mAdapter == null) {
-            mAdapter = new RiverListAdapter(this, mController.getRivers()/*, mController.checkPlywalnosc()*/);
+            mAdapter = new RiverListAdapter(this, mController.getRivers(), mController.checkPlywalnosc());
             lvRivers.setAdapter(mAdapter);
+        } else {
+            mAdapter.rivers = mController.getRivers();
+            mAdapter.plywalnosc = mController.checkPlywalnosc();
         }
-        mAdapter.rivers = mController.getRivers();
         mAdapter.notifyDataSetChanged();
         hideProgressSpinner();
 
@@ -229,7 +232,8 @@ public class MainActivity extends RoboActionBarActivity implements MainActivityI
     }
 
     @Override
-    public void displayProgress(String message) {
-        ((TextView)mProgressLayout.findViewById(R.id.progress_Text)).setText("Trwa ³adowanie danych: " + message);
+    public void displayProgress(int stringResId, String messageAlt) {
+        ((TextView)mProgressLayout.findViewById(R.id.progress_Text)).setText("Trwa ³adowanie danych: " + (stringResId != 0 ? this.getString(stringResId) : messageAlt));
     }
+
 }

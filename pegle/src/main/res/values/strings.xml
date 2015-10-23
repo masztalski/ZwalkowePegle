@@ -51,4 +51,6 @@
     <string name="mw2_przeplyw">mw2_przeplyw</string>
     <string name="hw_poziom">hw_poziom</string>
     <string name="hw_przeplyw">hw_przeplyw</string>
+    <string name="msg_SortRivers">Jeszcze chwila, dopasowuję stacje do rzek w wybranym województwie</string>
+    <string name="msg_setWojewodztwo">Rozpoczynam pobierać stacje do posortowania(ok. 600 stacji)</string>
 </resources>
