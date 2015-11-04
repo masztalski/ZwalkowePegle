@@ -1,15 +1,10 @@
 package fantomit.zwalkowepegle.DBmodels;
 
-import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.field.ForeignCollectionField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @DatabaseTable
 public class River {
@@ -40,11 +35,11 @@ public class River {
     public String getRiverShort() {
 //        String pattern = "\\d+";
 //        this.riverName = this.riverName.replaceAll(pattern, "");
-        return this.riverName.substring(0, this.riverName.indexOf('(')-1);
+        return this.riverName.substring(0, this.riverName.lastIndexOf('(') - 1);
     }
 
-    public String getRiverId(){
-        String temp = this.riverName.substring(riverName.indexOf('(')+1,riverName.indexOf(')'));
+    public String getRiverId() {
+        String temp = this.riverName.substring(riverName.lastIndexOf('(') + 1, riverName.lastIndexOf(')'));
         return temp;
     }
 
@@ -52,11 +47,11 @@ public class River {
         this.riverName = riverName;
     }
 
-    public ArrayList<String> getConnectedStations(){
+    public ArrayList<String> getConnectedStations() {
         return this.connectedStations;
     }
 
-    public void addConnectedStation(String id){
+    public void addConnectedStation(String id) {
         connectedStations.add(id);
     }
 

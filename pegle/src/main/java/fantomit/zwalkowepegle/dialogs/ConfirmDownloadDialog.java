@@ -18,25 +18,22 @@ import roboguice.fragment.RoboDialogFragment;
 public class ConfirmDownloadDialog extends RoboDialogFragment {
     @Inject
     EventBus eventBus;
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity())
                 .setTitle("Dostêpna nowa wersja aplikacji")
                 .setMessage("Czy chcesz teraz pobraæ i zainstalowaæ aplikacjê?")
-                .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        eventBus.post(new AktualizacjaEvent(true));
-                        dismiss();
-                    }
-                })
-                .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dismiss();
-                    }
-                });
+                .setPositiveButton("Tak", (DialogInterface dialog, int which) -> {
+                            eventBus.post(new AktualizacjaEvent(true));
+                            dismiss();
+                        }
+                )
+                .setNegativeButton("Anuluj", (DialogInterface dialog, int which) -> {
+                            dismiss();
+                        }
+                );
         return alert.create();
     }
 }

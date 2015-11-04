@@ -19,9 +19,10 @@ import fantomit.zwalkowepegle.db.repositories.impl.StationSQLImpl;
 public class ConnectionSourceModule extends AbstractModule implements Provider<ConnectionSource> {
     private Application app;
 
-    public ConnectionSourceModule(Application app){
+    public ConnectionSourceModule(Application app) {
         this.app = app;
     }
+
     @Override
     protected void configure() {
         bind(ConnectionSource.class).toProvider(this).in(Singleton.class);

@@ -3,7 +3,6 @@ package fantomit.zwalkowepegle.db.repositories.impl;
 import com.google.inject.Inject;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
-import com.j256.ormlite.dao.ForeignCollection;
 import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;
@@ -61,7 +60,7 @@ public class RiverSQLImpl implements RiverRepository {
     public River findById(int id) {
         try {
             return dao.queryForId(id);
-        } catch (SQLException e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
         return null;

@@ -7,7 +7,8 @@ public class ApkVersion {
     private double verName;
     private int verCode;
 
-    public ApkVersion(){}
+    public ApkVersion() {
+    }
 
     public double getVerName() {
         return verName;

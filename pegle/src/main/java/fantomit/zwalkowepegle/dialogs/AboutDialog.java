@@ -19,12 +19,10 @@ public class AboutDialog extends RoboDialogFragment {
         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity())
                 .setTitle("About / Help")
                 .setMessage(R.string.about)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dismiss();
-                    }
-                });
+                .setPositiveButton("Ok", (DialogInterface dialog, int which) -> {
+                            dismiss();
+                        }
+                );
         return alert.create();
     }
 }

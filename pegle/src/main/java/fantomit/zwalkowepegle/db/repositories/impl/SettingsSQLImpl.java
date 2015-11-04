@@ -7,10 +7,8 @@ import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;
 
-import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.DBmodels.Settings;
 import fantomit.zwalkowepegle.db.repositories.SettingsRepository;
-import fantomit.zwalkowepegle.db.repositories.StationRepository;
 
 public class SettingsSQLImpl implements SettingsRepository {
 

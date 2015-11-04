@@ -48,7 +48,7 @@ public class EditCustomStationDialog extends RoboDialogFragment {
 
         String idStation = getArguments().getString("ID");
         mStation = repoStation.findById(idStation);
-        if(mStation.isNotifByPrzeplyw()){
+        if (mStation.isNotifByPrzeplyw()) {
             notifSwitcher.setChecked(false);
             notifHint.setText("Powiadomiaj dla progowego przep³ywu");
         } else {
@@ -57,45 +57,46 @@ public class EditCustomStationDialog extends RoboDialogFragment {
         }
 
         notifSwitcher.setOnCheckedChangeListener((Switch view, boolean checked) -> {
-                statesSwitcher.check(mStation.getNotifCheckedId());
-                if(checked){
-                    notifHint.setText("Powiadomiaj dla progowego poziomu");
-                    mStation.setNotifByPrzeplyw(false);
-                } else{
-                    notifHint.setText("Powiadomiaj dla progowego przep³ywu");
-                    mStation.setNotifByPrzeplyw(true);
-                }
+            statesSwitcher.check(mStation.getNotifCheckedId());
+            if (checked) {
+                notifHint.setText("Powiadomiaj dla progowego poziomu");
+                mStation.setNotifByPrzeplyw(false);
+            } else {
+                notifHint.setText("Powiadomiaj dla progowego przep³ywu");
+                mStation.setNotifByPrzeplyw(true);
+            }
         });
 
         bClear.setOnClickListener((View v) -> {
-                mStation.setIsByDefaultCustomized(false);
-                mStation.setIsUserCustomized(false);
-                cleared = true;
-                Toast.makeText(getActivity(), "Przywrócono stany charakterystyczne na pobrane z serwera", Toast.LENGTH_SHORT);
-            }
+                    mStation.setIsByDefaultCustomized(false);
+                    mStation.setIsUserCustomized(false);
+                    cleared = true;
+                    Toast.makeText(getActivity(), "Przywrócono stany charakterystyczne na pobrane z serwera", Toast.LENGTH_SHORT);
+                }
         );
 
-        if(mStation.getNotifCheckedId() != -1){
+        if (mStation.getNotifCheckedId() != -1) {
             statesSwitcher.check(mStation.getNotifCheckedId());
         } else {
             statesSwitcher.check(R.id.lw);
+            mStation.setNotifCheckedId(R.id.lw);
         }
 
 
         statesSwitcher.setOnCheckedChangeListener((RadioGroup group, int checkedId) -> {
-                mStation.setNotifCheckedId(checkedId);
+                    mStation.setNotifCheckedId(checkedId);
                     switch (checkedId) {
                         case R.id.lw:
                             mStation.setNotifHint("LW");
                             if (!mStation.isNotifByPrzeplyw()) {
-                                if(mStation.getLw_poziom() != -1){
+                                if (mStation.getLw_poziom() != -1) {
                                     mStation.setDolnaGranicaPoziomu(mStation.getLw_poziom());
                                 } else {
                                     Double var = new Double(mStation.getStatus().getLowValue());
                                     mStation.setDolnaGranicaPoziomu(var.intValue());
                                 }
                             } else {
-                                if(mStation.getLw_przeplyw() != -1) {
+                                if (mStation.getLw_przeplyw() != -1) {
                                     mStation.setDolnaGranicaPrzeplywu(mStation.getLw_przeplyw());
                                 } else {
                                     Double var = new Double(mStation.getLowDischargeValue());
@@ -106,14 +107,14 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                         case R.id.mw2:
                             mStation.setNotifHint("MW");
                             if (!mStation.isNotifByPrzeplyw()) {
-                                if(mStation.getMw2_poziom() != -1){
+                                if (mStation.getMw2_poziom() != -1) {
                                     mStation.setDolnaGranicaPoziomu(mStation.getMw2_poziom());
                                 } else {
                                     Double var = new Double(mStation.getStatus().getHighValue());
                                     mStation.setDolnaGranicaPoziomu(var.intValue());
                                 }
                             } else {
-                                if(mStation.getMw2_przeplyw() != -1) {
+                                if (mStation.getMw2_przeplyw() != -1) {
                                     mStation.setDolnaGranicaPrzeplywu(mStation.getMw2_przeplyw());
                                 } else {
                                     Double var = new Double(mStation.getHighDischargeValue());
@@ -124,14 +125,14 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                         case R.id.hw:
                             mStation.setNotifHint("HW");
                             if (!mStation.isNotifByPrzeplyw()) {
-                                if(mStation.getHw_poziom() != -1){
+                                if (mStation.getHw_poziom() != -1) {
                                     mStation.setDolnaGranicaPoziomu(mStation.getHw_poziom());
                                 } else {
                                     Double var = new Double(mStation.getStatus().getHighValue());
                                     mStation.setDolnaGranicaPoziomu(var.intValue());
                                 }
                             } else {
-                                if(mStation.getHw_przeplyw() != -1) {
+                                if (mStation.getHw_przeplyw() != -1) {
                                     mStation.setDolnaGranicaPrzeplywu(mStation.getHw_przeplyw());
                                 } else {
                                     Double var = new Double(mStation.getHighDischargeValue());
@@ -140,24 +141,20 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                             }
                             break;
                     }
-            }
+                }
         );
 
         builder.setView(rootView)
                 .setTitle("Edytuj Stacjê")
                 .setMessage("Wybierz wg czego chcesz byæ powiadamiany i od jakiego poziomu")
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        repoStation.createOrUpdate(mStation);
-                    }
-                })
-                .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dismiss();
-                    }
-                });
+                .setPositiveButton("Ok", (DialogInterface dialog, int which) -> {
+                            repoStation.createOrUpdate(mStation);
+                        }
+                )
+                .setNegativeButton("Anuluj", (DialogInterface dialog, int which) -> {
+                            dismiss();
+                        }
+                );
         return builder.create();
     }
 }

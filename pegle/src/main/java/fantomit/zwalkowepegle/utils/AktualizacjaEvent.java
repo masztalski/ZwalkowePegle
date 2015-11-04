@@ -10,11 +10,11 @@ public class AktualizacjaEvent {
         this.czyPobrac = czyPobrac;
     }
 
-    public boolean czyPobrac(){
+    public boolean czyPobrac() {
         return czyPobrac;
     }
 
-    public void setCzyPobrac(boolean czyPobrac){
+    public void setCzyPobrac(boolean czyPobrac) {
         this.czyPobrac = czyPobrac;
     }
 }

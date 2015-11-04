@@ -1,7 +1,5 @@
 package fantomit.zwalkowepegle.webservices;
 
-import com.google.inject.Singleton;
-
 import java.util.List;
 
 import fantomit.zwalkowepegle.APImodels.StationListObject;

@@ -14,13 +14,14 @@ public class Settings {
     @DatabaseField
     private boolean hasWojewodztwoChanged = false;
     @DatabaseField
-    private int time = 30;
+    private int time = 60;
     @DatabaseField
     private int wojPos = 0;
     @DatabaseField
     private boolean stanyPogodynkaEnabled = false;
 
-    public Settings() {}
+    public Settings() {
+    }
 
     public boolean isNotificationEnabled() {
         return notificationEnabled;
@@ -46,7 +47,9 @@ public class Settings {
         this.time = time;
     }
 
-    public void setId(int id) {this.id = id;}
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public int getWojPos() {
         return wojPos;

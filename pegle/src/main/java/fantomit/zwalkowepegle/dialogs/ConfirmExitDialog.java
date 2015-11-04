@@ -15,18 +15,14 @@ public class ConfirmExitDialog extends RoboDialogFragment {
         AlertDialog.Builder alert = new AlertDialog.Builder(getActivity())
                 .setTitle("Wyjœcie z aplikacji")
                 .setMessage("Czy na pewno chcesz wyjœæ z aplikacji?")
-                .setPositiveButton("Tak", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        getActivity().finish();
-                    }
-                })
-                .setNegativeButton("Anuluj", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dismiss();
-                    }
-                });
+                .setPositiveButton("Tak", (DialogInterface dialog, int which) -> {
+                            getActivity().finish();
+                        }
+                )
+                .setNegativeButton("Anuluj", (DialogInterface dialog, int which) -> {
+                            dismiss();
+                        }
+                );
         return alert.create();
     }
 }

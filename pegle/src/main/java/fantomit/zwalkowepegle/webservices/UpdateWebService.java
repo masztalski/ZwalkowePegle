@@ -8,7 +8,7 @@ import rx.Observable;
  * Created by mmar12 on 2015-10-12.
  */
 public interface UpdateWebService {
-    @GET("/curVersion.txt")
+    @GET("/phocadownload/apk/curVersion.txt")
     Observable<ApkVersion> getCurrentVersion();
 
 }

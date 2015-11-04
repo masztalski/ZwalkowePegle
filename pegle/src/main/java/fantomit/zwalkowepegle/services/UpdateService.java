@@ -13,6 +13,8 @@ import android.webkit.MimeTypeMap;
 
 import com.google.inject.Inject;
 
+import java.net.SocketTimeoutException;
+
 import de.greenrobot.event.EventBus;
 import fantomit.zwalkowepegle.APImodels.ApkVersion;
 import fantomit.zwalkowepegle.ZwalkiApplication;
@@ -36,17 +38,16 @@ public class UpdateService extends RoboService {
     ApkVersion newVersion;
 
     private DownloadManager mDownloader;
-    @Inject UpdateWebService updateWS;
+    @Inject
+    UpdateWebService updateWS;
     @Inject
     EventBus eventBus;
-//    @Inject
-//    MainActivityInterface mView;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mDownloader = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-        if(!eventBus.isRegistered(this)){
+        if (!eventBus.isRegistered(this)) {
             eventBus.register(this);
         }
     }
@@ -59,36 +60,41 @@ public class UpdateService extends RoboService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if(intent != null) {
+        if (intent != null) {
             Bundle extras = intent.getExtras();
             verName = Double.parseDouble(extras.getString("verName"));
             verCode = extras.getInt("verCode");
-            Log.e("UpdateService" , "Uruchomiony");
+            Log.e("UpdateService", "Uruchomiony");
 
             Observable<ApkVersion> result = updateWS.getCurrentVersion();
 
-            result.observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<ApkVersion>() {
-                @Override
-                public void call(ApkVersion apkVersion) {
-                    newVersion = apkVersion;
-                    if (apkVersion.getVerName() > verName) {
-                        Log.e("UpdateService", "nowa wersja");
-                        eventBus.post(new AktualizacjaEvent(false));
-                    } else if (apkVersion.getVerName() == verName && apkVersion.getVerCode() > verCode) {
-                        eventBus.post(new AktualizacjaEvent(false));
-                        Log.e("UpdateService", "nowa wersja");
-                    }
+            result.observeOn(AndroidSchedulers.mainThread()).subscribe(apkVersion -> {
+                newVersion = apkVersion;
+                if (apkVersion.getVerName() > verName) {
+                    Log.e("UpdateService", "nowa wersja");
+                    eventBus.post(new AktualizacjaEvent(false));
+                } else if (apkVersion.getVerName() == verName && apkVersion.getVerCode() > verCode) {
+                    eventBus.post(new AktualizacjaEvent(false));
+                    Log.e("UpdateService", "nowa wersja");
                 }
             }, new RetroFitErrorHelper(null));
+
         }
 
         return super.onStartCommand(intent, flags, startId);
     }
 
-    private void downloadAPK(){
+    public void onEvent(AktualizacjaEvent event) {
+        Log.e("EVENT", "event aktualizacji w UpdateService");
+        if (event.czyPobrac()) {
+            downloadAPK();
+        }
+    }
+
+    private void downloadAPK() {
         Log.e("UpdateService", "Pobieranie APK");
         fileName = "Pegle-" + Double.toString(newVersion.getVerName()) + "B" + Integer.toString(newVersion.getVerCode()) + "-release.apk";
-        String URL = ZwalkiApplication.APK_SOURCE + '/' + fileName;
+        String URL = ZwalkiApplication.MY_API_SOURCE + "/phocadownload/apk" + fileName;
         String ext = MimeTypeMap.getFileExtensionFromUrl(URL);
         MimeTypeMap mimeMap = MimeTypeMap.getSingleton();
         String mime = mimeMap.getMimeTypeFromExtension(ext);
@@ -104,12 +110,5 @@ public class UpdateService extends RoboService {
         req.setVisibleInDownloadsUi(true);
 
         mDownloader.enqueue(req);
-    }
-
-    public void onEvent(AktualizacjaEvent event){
-        Log.e("EVENT", "event aktualizacji w UpdatService");
-        if(event.czyPobrac()){
-            downloadAPK();
-        }
     }
 }

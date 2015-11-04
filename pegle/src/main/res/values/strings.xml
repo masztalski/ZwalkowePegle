@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Zwałkowe Pegle</string>
 
@@ -9,8 +10,12 @@
         Dane pochodzą z serwisu pogodynka.pl \n \n
         Pomoc:\n
         Aby usunąć niechcianą rzekę należy przytrzymać na niej palec a następnie zatwierdzić usunięcie\n
-        Użytkownik może sam ustawić dolne granice pływalności dla wybranej stacji(ikona ołówka)
-        które będą wyświetlane na wykresie oraz będą wyznacznikiem dla powiadomień w przypadku dodania stacji do ulubionych
+        Użytkownik może sam ustawić dolne granice pływalności przy których nastąpi powiadomienie dla wybranej stacji(ikona ołówka)\n
+        Aby otrzymywać powiadomienia należy upewnić się, że opcja ta jest włączona w ustawieniach(domyślnie włączona) oraz dodać wybraną stację do ulubionych\n
+        Domyślnie wyłączone jest wyświetlanie na wykresie stanów charakterystycznych na podstawie serwisu pogodynka.pl - jednak można je w ustawieniach włączyć\n
+        Po otrzymaniu lub wygenerowaniu pliku stany.peg należy go wczytać w ustawieniach przyciskiem "Załaduj dane", a następnie zatwierdzić. Wtedy dla stacji skonfigurowanych
+        tym plikiem automatycznie wyświetlą się przyciski do wyświetlania stanów charakterystycznych na wykresie.\n
+        UWAGA: Jako developer nie odpowiadam za poprawność wyświetlanych danych oraz ich kompletność - są one ode mnie niezależne.
     </string>
 
     <string-array name="provinices_values">
@@ -53,4 +58,5 @@
     <string name="hw_przeplyw">hw_przeplyw</string>
     <string name="msg_SortRivers">Jeszcze chwila, dopasowuję stacje do rzek w wybranym województwie</string>
     <string name="msg_setWojewodztwo">Rozpoczynam pobierać stacje do posortowania(ok. 600 stacji)</string>
+    <string name="no_data_msg">Brak dostępnych danych</string>
 </resources>

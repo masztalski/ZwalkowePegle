@@ -13,7 +13,8 @@ import fantomit.zwalkowepegle.services.UpdateService;
 public class UpdateReceiver extends BroadcastReceiver {
     public static final String _UPDATE = "update";
 
-    public UpdateReceiver() {}
+    public UpdateReceiver() {
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {

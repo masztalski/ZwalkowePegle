@@ -40,14 +40,4 @@
         android:text="ID rzeki"
         android:id="@+id/tvRiverIdHeader"
         />
-    <!--dla TextView: android:layout_weight="3" !-->
-
-    <!--
-    <ImageView
-        android:layout_width="0dp"
-        android:layout_height="20dp"
-        android:layout_weight="1.5"
-        android:id="@+id/iconTrend"
-        />
-    !-->
 </RelativeLayout>

@@ -7,7 +7,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import java.io.Serializable;
 
 @DatabaseTable
-public class StationStatus implements Serializable{
+public class StationStatus implements Serializable {
     @DatabaseField
     private String name;    //ID stacji
     @DatabaseField

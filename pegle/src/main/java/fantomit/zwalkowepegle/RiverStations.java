@@ -56,10 +56,10 @@ public class RiverStations extends RoboActionBarActivity implements RiverStation
             refreshList();
         }
         mStations.setOnItemClickListener((AdapterView<?> parent, View view, int position, long id) -> {
-                Intent i = new Intent(RiverStations.this, StationDetails.class);
-                i.putExtra("STATION_ID", mController.getStations().get(position).getId());
-                startActivity(i);
-            }
+                    Intent i = new Intent(RiverStations.this, StationDetails.class);
+                    i.putExtra("STATION_ID", mController.getStations().get(position).getId());
+                    startActivity(i);
+                }
         );
 
     }
@@ -92,12 +92,11 @@ public class RiverStations extends RoboActionBarActivity implements RiverStation
     }
 
     public void refreshList() {
-        if(mController.getStations() != null && mController.getStations().size() > 0) {
+        if (mController.getStations() != null && mController.getStations().size() > 0) {
             Comparator<Station> RIVER_KM_ORDER = (Station object1, Station object2) -> {
-                    int res = Double.compare(object2.getStatus().getRiverCourseKm(), object1.getStatus().getRiverCourseKm());
-                    return res;
-                }
-            ;
+                int res = Double.compare(object2.getStatus().getRiverCourseKm(), object1.getStatus().getRiverCourseKm());
+                return res;
+            };
             Collections.sort(mController.getStations(), RIVER_KM_ORDER);
             mController.isSorted = true;
 

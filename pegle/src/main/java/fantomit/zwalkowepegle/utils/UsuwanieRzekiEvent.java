@@ -1,19 +1,21 @@
 package fantomit.zwalkowepegle.utils;
 
+import java.util.ArrayList;
+
 public class UsuwanieRzekiEvent {
     private boolean czyUsunac;
-    private int riverPos;
+    private ArrayList<Integer> riverPos;
 
-    public UsuwanieRzekiEvent(boolean czyUsunac, int riverPos){
+    public UsuwanieRzekiEvent(boolean czyUsunac, ArrayList<Integer> riverPos) {
         this.czyUsunac = czyUsunac;
         this.riverPos = riverPos;
     }
 
-    public boolean czyUsunac(){
+    public boolean czyUsunac() {
         return czyUsunac;
     }
 
-    public int getRiverPos(){
+    public ArrayList<Integer> getRiverPos() {
         return riverPos;
     }
 }

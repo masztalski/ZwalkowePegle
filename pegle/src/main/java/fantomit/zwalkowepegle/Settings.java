@@ -6,8 +6,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,20 +13,18 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.buganalytics.trace.BugAnalytics;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
 import com.google.inject.Inject;
 import com.rey.material.widget.Switch;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import fantomit.zwalkowepegle.controllers.SettingsController;
 import fantomit.zwalkowepegle.dialogs.AboutDialog;
@@ -84,7 +80,10 @@ public class Settings extends RoboActionBarActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mController.wojewodztwo = (String) parent.getAdapter().getItem(position);
                 mController.wojPos = position;
-                BugAnalytics.sendEvent ("Zmiana województwa");
+                if(!BuildConfig.DEBUG) {
+                    Answers.getInstance().logCustom(new CustomEvent("Wczytanie województwa")
+                            .putCustomAttribute("name", mController.wojewodztwo));
+                }
             }
 
             @Override
@@ -125,55 +124,54 @@ public class Settings extends RoboActionBarActivity {
         });
 
         notification_switch.setOnCheckedChangeListener((Switch aSwitch, boolean checked) -> {
-                if (checked) {
-                    spinTime.setEnabled(true);
-                    mController.notificationEnabled = true;
-                    notif_hint.setText("W³¹czone powiadomienia o ulubionych");
-                } else {
-                    spinTime.setEnabled(false);
-                    mController.notificationEnabled = false;
-                    notif_hint.setText("Wy³¹czone powiadomienia o ulubionych");
+                    if (checked) {
+                        spinTime.setEnabled(true);
+                        mController.notificationEnabled = true;
+                        notif_hint.setText("W³¹czone powiadomienia o ulubionych");
+                    } else {
+                        spinTime.setEnabled(false);
+                        mController.notificationEnabled = false;
+                        notif_hint.setText("Wy³¹czone powiadomienia o ulubionych");
+                    }
                 }
-            }
         );
 
         addData.setOnClickListener((View v) -> {
-                FragmentManager fm = getSupportFragmentManager();
-                File path = new File(Environment.getExternalStorageDirectory() + "//DIR//");
-                FileDialog fileDialog = new FileDialog(Settings.this, path);
-                fileDialog.setFileEndsWith(".peg");
-                fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
-                    public void fileSelected(File file) {
-                        Log.e(getClass().getName(), "selected file " + file.toString());
-                        Toast.makeText(Settings.this, "Wczytano plik ze stanami charakterystycznymi. ZatwierdŸ zmiany aby za³adowaæ dane do stacji", Toast.LENGTH_SHORT).show();
-                        mController.readFromFile(file);
-                    }
-                });
-                fileDialog.showDialog();
-                BugAnalytics.sendEvent("Wczytanie pliku stany.peg");
-            }
+                    FragmentManager fm = getSupportFragmentManager();
+                    File path = new File(Environment.getExternalStorageDirectory() + "//DIR//");
+                    FileDialog fileDialog = new FileDialog(Settings.this, path);
+                    fileDialog.setFileEndsWith(".peg");
+                    fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
+                        public void fileSelected(File file) {
+                            Log.e(getClass().getName(), "selected file " + file.toString());
+                            Toast.makeText(Settings.this, "Wczytano plik ze stanami charakterystycznymi. ZatwierdŸ zmiany aby za³adowaæ dane do stacji", Toast.LENGTH_SHORT).show();
+                            mController.readFromFile(file);
+                        }
+                    });
+                    fileDialog.showDialog();
+                }
         );
 
         clearFavs.setOnClickListener((View v) -> {
-                mController.deleteFavs();
-                Toast.makeText(Settings.this, "Usuniêto ulubione", Toast.LENGTH_SHORT).show();
-            }
+                    mController.deleteFavs();
+                    Toast.makeText(Settings.this, "Usuniêto ulubione", Toast.LENGTH_SHORT).show();
+                }
         );
 
         apply.setOnClickListener((View v) -> {
-                if (mController.timeOfDownloading != 30) {
-                    Intent i = new Intent();
-                    i.setAction(FavsDownloadReceiver._ACTION);
-                    sendBroadcast(i);
+                    if (mController.timeOfDownloading != 30) {
+                        Intent i = new Intent();
+                        i.setAction(FavsDownloadReceiver._ACTION);
+                        sendBroadcast(i);
+                    }
+                    mController.saveSettings();
+                    Toast.makeText(Settings.this, "Zapisano zmiany", Toast.LENGTH_SHORT).show();
+                    finish();
                 }
-                mController.saveSettings();
-                Toast.makeText(Settings.this, "Zapisano zmiany", Toast.LENGTH_SHORT).show();
-                finish();
-            }
         );
 
         defStates_switch.setOnCheckedChangeListener((Switch aSwitch, boolean checked) -> {
-            if(checked){
+            if (checked) {
                 defStates_hint.setText("W³¹czone stany charakterystyczne z Pogodynki");
                 mController.stanyPogodynkaEnabled = true;
             } else {
@@ -209,7 +207,7 @@ public class Settings extends RoboActionBarActivity {
         spinWojewodztwa.setSelection(set.getWojPos());
         notification_switch.setChecked(set.isNotificationEnabled());
         defStates_switch.setChecked(set.isStanyPogodynkaEnabled());
-        if(set.isStanyPogodynkaEnabled()){
+        if (set.isStanyPogodynkaEnabled()) {
             defStates_hint.setText("W³¹czone stany charakterystyczne z Pogodynki");
         } else {
             defStates_hint.setText("Wy³¹czone stany charakterystyczne z Pogodynki");
@@ -237,7 +235,7 @@ public class Settings extends RoboActionBarActivity {
                 spinTime.setSelection(4);
                 break;
             default:
-                spinTime.setSelection(1);
+                spinTime.setSelection(2);
         }
     }
 

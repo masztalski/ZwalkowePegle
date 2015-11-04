@@ -8,8 +8,6 @@ import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
-import java.sql.SQLException;
-
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.DBmodels.River;
 import fantomit.zwalkowepegle.DBmodels.Settings;
@@ -20,7 +18,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private static final String DATABASE_NAME = "DOLNOSLASKIE.db";
     // any time you make changes to your database objects, you may have to
     // increase the database version
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 14;
 
     // the DAO object we use to access the SimpleData table
     //private Dao<City, Integer > simpleDao = null;
@@ -45,15 +43,15 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase database, ConnectionSource connectionSource, int oldVersion, int newVersion) {
-            Log.i(DatabaseHelper.class.getName(), "onUpgrade");
-            try {
-                // if you need to create the 'cities' table make this call
-                TableUtils.dropTable(connectionSource, River.class, true);
-                TableUtils.dropTable(connectionSource, Station.class, true);
-                TableUtils.dropTable(connectionSource, Settings.class, true);
-            } catch (java.sql.SQLException e) {
-                e.printStackTrace();
-            }
-            onCreate(database, connectionSource);
+        Log.i(DatabaseHelper.class.getName(), "onUpgrade");
+        try {
+            // if you need to create the 'cities' table make this call
+            TableUtils.dropTable(connectionSource, River.class, true);
+            TableUtils.dropTable(connectionSource, Station.class, true);
+            TableUtils.dropTable(connectionSource, Settings.class, true);
+        } catch (java.sql.SQLException e) {
+            e.printStackTrace();
+        }
+        onCreate(database, connectionSource);
     }
 }

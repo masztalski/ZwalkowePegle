@@ -6,9 +6,13 @@ import fantomit.zwalkowepegle.APImodels.Station;
 
 public interface StationRepository {
     List<Station> getAll();
+
     Station findById(String id);
+
     boolean createOrUpdate(Station s);
+
     boolean delete(Station s);
+
     boolean deleteAll();
 
 }

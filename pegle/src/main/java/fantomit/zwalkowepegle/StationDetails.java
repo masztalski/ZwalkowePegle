@@ -9,6 +9,7 @@ import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,15 +22,21 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartGestureListener;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.google.inject.Inject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
+import fantomit.zwalkowepegle.APImodels.MyRecord;
 import fantomit.zwalkowepegle.APImodels.PrzeplywRecord;
-import fantomit.zwalkowepegle.APImodels.StateRecord;
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.controllers.StationController;
 import fantomit.zwalkowepegle.dialogs.EditCustomStationDialog;
@@ -86,7 +93,7 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
         if (getIntent().getExtras().containsKey("STATION_ID") && savedInstanceState == null) {
             mController.loadStacja(getIntent().getStringExtra("STATION_ID"));
         } else if (savedInstanceState != null) {
-            loadView();
+            loadView(true);
         }
 
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.primary)));
@@ -157,18 +164,19 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
     }
 
     @Override
-    public void loadView() {
-        if(mController == null || mController.getStacja() == null){
+    public void loadView(boolean loadExistingData) {
+        Log.e("FANTOM", mController.getStacja().getName() + " - loadView");
+        if (mController == null || mController.getStacja() == null) {
             Toast.makeText(this, "Wyst¹pi³ nieznany b³¹d. Powiadom Developera o nazwie stacji/rzeki gdzie wyst¹pi³ b³¹d", Toast.LENGTH_SHORT).show();
             return;
         }
-        if(mController.getStacja().getHw_poziom() == -1) {
+        if (mController.getStacja().getHw_poziom() == -1) {
             mLevelSwitches.findViewById(R.id.hw_level).setVisibility(View.GONE);
         }
-        if(mController.getStacja().getHw_przeplyw() == -1){
+        if (mController.getStacja().getHw_przeplyw() == -1) {
             mPrzeplywSwitches.findViewById(R.id.hw_przeplyw).setVisibility(View.GONE);
         }
-        if(!mController.pogodynkaStatesEnabled()){
+        if (!mController.pogodynkaStatesEnabled() && !mController.isUserCustomized()) {
             mLevelSwitches.findViewById(R.id.lw_level).setVisibility(View.GONE);
             mLevelSwitches.findViewById(R.id.mw2_level).setVisibility(View.GONE);
             mLevelSwitches.findViewById(R.id.hw_level).setVisibility(View.GONE);
@@ -176,10 +184,9 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
             mPrzeplywSwitches.findViewById(R.id.mw2_przeplyw).setVisibility(View.GONE);
             mPrzeplywSwitches.findViewById(R.id.hw_przeplyw).setVisibility(View.GONE);
         }
-        Log.e("FANTOM", mController.getStacja().getName() + " - loadView");
         getSupportActionBar().setTitle(mController.getStacja().getName());
         String date = mController.getStacja().getStatus().getCurrentDate();
-        if(date.contains("T") && date.contains("Z")) {
+        if (date.contains("T") && date.contains("Z")) {
             String dzien = date.substring(0, date.indexOf('T'));
             String godzina = date.substring(date.indexOf('T') + 1, date.indexOf('Z'));
             getSupportActionBar().setSubtitle(dzien + '\n' + godzina + " GMT");
@@ -187,12 +194,17 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
         mCurrentLevel.setText(Integer.toString(mController.getStacja().getStatus().getCurrentValue()) + " cm");
         List<PrzeplywRecord> przeplywRecords = mController.getStacja().getDischargeRecords();
         String przeplyw = "";
-        if(przeplywRecords != null && !przeplywRecords.isEmpty()) {
+        if (przeplywRecords != null && !przeplywRecords.isEmpty()) {
             przeplyw = Double.toString(przeplywRecords.get(przeplywRecords.size() - 1).getValue()) + " m<sup>3</sup>/s";
         }
+        if(przeplyw.isEmpty()){
+            przeplyw = "- m<sup>3</sup>/s";
+        }
         mCurrentPrzeplyw.setText(Html.fromHtml(przeplyw), TextView.BufferType.SPANNABLE);
-        mWarningLevel.setText(Double.toString(mController.getStacja().getStatus().getWarningValue()) + " cm");
-        mAlarmLevel.setText(Double.toString(mController.getStacja().getStatus().getAlarmValue()) + " cm");
+        String tempVar = Double.toString(mController.getStacja().getStatus().getWarningValue());
+        mWarningLevel.setText((!tempVar.equals("0.0") ? tempVar : "-") + " cm");
+        tempVar = Double.toString(mController.getStacja().getStatus().getAlarmValue());
+        mAlarmLevel.setText((!tempVar.equals("0.0") ? tempVar : "-") + " cm");
         String trend = mController.getStacja().getTrend();
         if (trend.equals("const")) {
             mTrend.setImageResource(R.drawable.ic_trending_neutral_black_48dp);
@@ -203,34 +215,207 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
         } else {
             mTrend.setImageResource(R.drawable.ic_help_black_36dp);
         }
-        loadDataToLevelChart();
-        loadDataToPrzeplywChart();
+        mLevelChart.setNoDataText(getString(R.string.no_data_msg));
+        mPrzeplywChart.setNoDataText(getString(R.string.no_data_msg));
+        if(loadExistingData){
+            loadDataToLevelChart();
+            loadDataToPrzeplywChart();
+        }
 
+        mLevelChart.setOnChartGestureListener(new OnChartGestureListener() {
+            @Override
+            public void onChartLongPressed(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartDoubleTapped(MotionEvent me) {
+                if(BuildConfig.DEBUG){
+                    Toast.makeText(StationDetails.this, "X Range: " + Integer.toString(mLevelChart.getLowestVisibleXIndex()) + " - " + Integer.toString(mLevelChart.getHighestVisibleXIndex()), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onChartSingleTapped(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+
+            }
+
+            @Override
+            public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+                int lowestXIndex = mLevelChart.getLowestVisibleXIndex();
+                //Log.e("CHART", Integer.toString(lowestXIndex));
+                if(lowestXIndex >= 300 && lowestXIndex <= 380 && !mController.isTriggerFired){ //po³owa miesi¹ca = 360
+                    //Za³aduj dla kolejnego miesi¹ca
+                    Log.e("CHART", "Load another set");
+                    Log.e("CHART", "Obecnie jest danych: " + Integer.toString(mLevelChart.getXAxis().getValues().size()));
+                    mController.isTriggerFired = true;
+                    Calendar c = Calendar.getInstance();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        c.setTime(sdf.parse(mLevelChart.getXAxis().getValues().get(0)));
+                    } catch (ParseException e){
+                        e.printStackTrace();
+                    }
+                    String end = mLevelChart.getXAxis().getValues().get(0); //najwczeœniejsza data
+                    c.add(Calendar.MONTH, -1);
+                    //c.add(Calendar.DAY_OF_MONTH, -1);
+                    String begin = sdf.format(c.getTime());
+                    mController.loadHistoricStates("level", begin, end, false);
+                }
+            }
+
+            @Override
+            public void onChartTranslate(MotionEvent me, float dX, float dY) {
+                int lowestXIndex = mLevelChart.getLowestVisibleXIndex();
+                //Log.e("CHART", Integer.toString(lowestXIndex));
+                if(lowestXIndex >= 300 && lowestXIndex <= 380 && !mController.isTriggerFired){ //po³owa miesi¹ca = 360
+                    //Za³aduj dla kolejnego miesi¹ca
+                    Log.e("CHART", "Load another set");
+                    Log.e("CHART", "Obecnie jest danych: " + Integer.toString(mLevelChart.getXAxis().getValues().size()));
+                    mController.isTriggerFired = true;
+                    Calendar c = Calendar.getInstance();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        c.setTime(sdf.parse(mLevelChart.getXAxis().getValues().get(0)));
+                    } catch (ParseException e){
+                        e.printStackTrace();
+                    }
+                    String end = mLevelChart.getXAxis().getValues().get(0); //najwczeœniejsza data
+                    c.add(Calendar.MONTH, -1);
+                    //c.add(Calendar.DAY_OF_MONTH, -1);
+                    String begin = sdf.format(c.getTime());
+                    mController.loadHistoricStates("level", begin, end, false);
+                }
+            }
+        });
+
+        mLevelChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, int dataSetIndex, Highlight h) {
+                Toast.makeText(StationDetails.this, mLevelChart.getXAxis().getValues().get(e.getXIndex()) + " : " + Float.toString(e.getVal()) + " cm", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
+
+        mPrzeplywChart.setOnChartGestureListener(new OnChartGestureListener() {
+            @Override
+            public void onChartLongPressed(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartDoubleTapped(MotionEvent me) {
+                if(BuildConfig.DEBUG){
+                    Toast.makeText(StationDetails.this, "X Range: " + Integer.toString(mPrzeplywChart.getLowestVisibleXIndex()) + " - " + Integer.toString(mPrzeplywChart.getHighestVisibleXIndex()), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onChartSingleTapped(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+
+            }
+
+            @Override
+            public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+                int lowestXIndex = mPrzeplywChart.getLowestVisibleXIndex();
+                //Log.e("CHART", Integer.toString(lowestXIndex));
+                if (lowestXIndex >= 300 && lowestXIndex <= 380 && !mController.isTriggerFired) { //po³owa miesi¹ca = 360
+                    //Za³aduj dla kolejnego miesi¹ca
+                    Log.e("CHART", "Load another set");
+                    Log.e("CHART", "Obecnie jest danych: " + Integer.toString(mPrzeplywChart.getXAxis().getValues().size()));
+                    mController.isTriggerFired = true;
+                    Calendar c = Calendar.getInstance();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        c.setTime(sdf.parse(mPrzeplywChart.getXAxis().getValues().get(0)));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    String end = mPrzeplywChart.getXAxis().getValues().get(0); //najwczeœniejsza data
+                    c.add(Calendar.MONTH, -1);
+                    //c.add(Calendar.DAY_OF_MONTH, -1);
+                    String begin = sdf.format(c.getTime());
+                    mController.loadHistoricStates("przeplyw", begin, end, false);
+                }
+            }
+
+            @Override
+            public void onChartTranslate(MotionEvent me, float dX, float dY) {
+                int lowestXIndex = mPrzeplywChart.getLowestVisibleXIndex();
+                //Log.e("CHART", Integer.toString(lowestXIndex));
+                if (lowestXIndex >= 300 && lowestXIndex <= 380 && !mController.isTriggerFired) { //po³owa miesi¹ca = 360
+                    //Za³aduj dla kolejnego miesi¹ca
+                    Log.e("CHART", "Load another set");
+                    Log.e("CHART", "Obecnie jest danych: " + Integer.toString(mPrzeplywChart.getXAxis().getValues().size()));
+                    mController.isTriggerFired = true;
+                    Calendar c = Calendar.getInstance();
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        c.setTime(sdf.parse(mPrzeplywChart.getXAxis().getValues().get(0)));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                    String end = mPrzeplywChart.getXAxis().getValues().get(0); //najwczeœniejsza data
+                    c.add(Calendar.MONTH, -1);
+                    //c.add(Calendar.DAY_OF_MONTH, -1);
+                    String begin = sdf.format(c.getTime());
+                    mController.loadHistoricStates("przeplyw", begin, end, false);
+                }
+            }
+        });
+
+        mPrzeplywChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, int dataSetIndex, Highlight h) {
+                Toast.makeText(StationDetails.this, mPrzeplywChart.getXAxis().getValues().get(e.getXIndex()) + " : " + Float.toString(e.getVal()) + " m3/s", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
     }
 
+    @Override
     public void loadDataToLevelChart() {
         Station stacja = mController.getStacja();
         if (stacja == null) {
             return;
         }
         Log.e("FANTOM", stacja.getName() + " - loadLevelChart");
-        List<StateRecord> stateRecords = stacja.getWaterStateRecords();
+        //List<StateRecord> stateRecords = stacja.getWaterStateRecords();
+        List<MyRecord> stateRecords = mController.getmLevelHistoricStates();
         List<Entry> yVals = new ArrayList<>();
         List<String> labels = new ArrayList<>();
         int i = 0;
-        if(stateRecords == null || stateRecords.isEmpty()){
+        if (stateRecords == null || stateRecords.isEmpty()) {
             return;
         }
-        for (StateRecord record : stateRecords) {
-            String date = record.getDate();
-            String dzien = date.substring(0, date.indexOf('T'));
-            String godzina = date.substring(date.indexOf('T') + 1, date.indexOf('Z'));
+        for (MyRecord record : stateRecords) {
+//            String date = record.getDate_level();
+//            String dzien = date.substring(0, date.indexOf('T'));
+//            String godzina = date.substring(date.indexOf('T') + 1, date.indexOf('Z'));
             yVals.add(new Entry(new Float(record.getValue()), i));
-            labels.add(dzien + ' ' + godzina);
+            labels.add(record.getDate());
             i++;
         }
 
-        LineDataSet pobrane = new LineDataSet(yVals, "Wykres stanu wody za ostatnie 3 doby");
+        LineDataSet pobrane = new LineDataSet(yVals, "Poziom wody [cm]");
         pobrane.setDrawValues(false);
         pobrane.setCircleSize(0);
         pobrane.setLineWidth(1.5f);
@@ -243,36 +428,51 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
         leftAxis.setStartAtZero(false);
         mLevelChart.getAxisLeft().setAxisMaxValue(data.getYMax() + 5);
         mLevelChart.getAxisLeft().setAxisMinValue(data.getYMin() - 5);
-        mLevelChart.setTouchEnabled(false);
+        mLevelChart.setTouchEnabled(true);
+        mLevelChart.setScaleYEnabled(false);
         mLevelChart.setDescription("");
+        mLevelChart.setNoDataText(getString(R.string.no_data_msg));
         mLevelChart.setAutoScaleMinMaxEnabled(true);
         mLevelChart.setDrawGridBackground(false);
+        if(!mController.isTriggerFired) {
+            mLevelChart.moveViewToX(mLevelChart.getLineData().getXValCount() - 1);
+        }
         mLevelChart.notifyDataSetChanged();
         mLevelChart.invalidate();
+        mLevelChart.zoom(1.8f,1.0f,0,0);
+        mController.isTriggerFired = false;
+        if(mLevelChart.isEmpty()){
+            mLevelSwitches.findViewById(R.id.nothing_level).setVisibility(View.GONE);
+        }
+        hideProgressSpinner();
     }
 
+    @Override
     public void loadDataToPrzeplywChart() {
+        mPrzeplywChart.setNoDataText(getString(R.string.no_data_msg));
         Station stacja = mController.getStacja();
         if (stacja == null) {
             return;
         }
-        List<PrzeplywRecord> stateRecords = stacja.getDischargeRecords();
+        Log.e("FANTOM", stacja.getName() + " - loadPrzeplywChart");
+        //List<PrzeplywRecord> stateRecords = stacja.getDischargeRecords();
+        List<MyRecord> stateRecords = mController.getmPrzeplywHistoricStates();
         List<Entry> yVals = new ArrayList<>();
         List<String> labels = new ArrayList<>();
         int i = 0;
-        if(stateRecords == null || stateRecords.isEmpty()){
+        if (stateRecords == null || stateRecords.isEmpty()) {
             return;
         }
-        for (PrzeplywRecord record : stateRecords) {
-            String date = record.getDate();
-            String dzien = date.substring(0, date.indexOf('T'));
-            String godzina = date.substring(date.indexOf('T') + 1, date.indexOf('Z'));
+        for (MyRecord record : stateRecords) {
+//            String date = ;
+//            String dzien = date.substring(0, date.indexOf('T'));
+//            String godzina = date.substring(date.indexOf('T') + 1, date.indexOf('Z'));
             yVals.add(new Entry(new Float(record.getValue()), i));
-            labels.add(dzien + ' ' + godzina);
+            labels.add(record.getDate());
             i++;
         }
 
-        LineDataSet pobrane = new LineDataSet(yVals, "Przep³yw");
+        LineDataSet pobrane = new LineDataSet(yVals, "Przep³yw [m3/s]");
         pobrane.setDrawValues(false);
         pobrane.setCircleSize(0);
         pobrane.setLineWidth(1.5f);
@@ -285,14 +485,24 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
         YAxis leftAxis = mLevelChart.getAxisLeft();
         mPrzeplywChart.getAxisRight().setEnabled(false);
         leftAxis.setStartAtZero(false);
-        mPrzeplywChart.getAxisLeft().setAxisMaxValue(data.getYMax()+3);
-        mPrzeplywChart.getAxisLeft().setAxisMinValue(data.getYMin()-3);
-        mPrzeplywChart.setTouchEnabled(false);
+        mPrzeplywChart.getAxisLeft().setAxisMaxValue(data.getYMax() + 3);
+        mPrzeplywChart.getAxisLeft().setAxisMinValue(data.getYMin() - 3);
+        mPrzeplywChart.setTouchEnabled(true);
+        mPrzeplywChart.setScaleYEnabled(false);
         mPrzeplywChart.setDescription("");
         mPrzeplywChart.setAutoScaleMinMaxEnabled(true);
         mPrzeplywChart.setDrawGridBackground(false);
+        if(!mController.isTriggerFired) {
+            mPrzeplywChart.moveViewToX(mPrzeplywChart.getLineData().getXValCount() - 1);
+        }
         mPrzeplywChart.notifyDataSetChanged();
         mPrzeplywChart.invalidate();
+        mPrzeplywChart.zoom(1.8f, 1.0f, 0, 0);
+        mController.isTriggerFired = false;
+        if(mPrzeplywChart.isEmpty()){
+            mPrzeplywSwitches.findViewById(R.id.nothing_przeplyw).setVisibility(View.GONE);
+        }
+        hideProgressSpinner();
     }
 
     @Override
@@ -303,7 +513,7 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
 
     private void addCharakterystycznyLevel(@WaterStates int state) {
         List<Entry> yVals2 = new ArrayList<>();
-        List<StateRecord> stateRecords = mController.getStacja().getWaterStateRecords();
+        List<MyRecord> stateRecords = mController.getmLevelHistoricStates();
         String label = "";
         if (mController.getStacja().isUserCustomized() || mController.getStacja().isByDefaultCustomized()) {
             float var;
@@ -362,7 +572,7 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
 
     private void addCharakterystycznyPrzeplyw(@WaterStates int state) {
         List<Entry> yVals = new ArrayList<>();
-        List<PrzeplywRecord> stateRecords = mController.getStacja().getDischargeRecords();
+        List<MyRecord> stateRecords = mController.getmPrzeplywHistoricStates();
         String label = "";
         if (mController.getStacja().isUserCustomized() || mController.getStacja().isByDefaultCustomized()) {
             float var;
@@ -420,93 +630,97 @@ public class StationDetails extends RoboActionBarActivity implements StationDeta
 
     private void createListners() {
         levelListener = (RadioGroup group, int checkedId) -> {
-                switch (checkedId) {
-                    case R.id.nothing_level:
-                        if (mLevelChart.getLineData().getDataSetCount() > 1) {
-                            mLevelChart.getLineData().removeDataSet(1);
-                            mLevelChart.getAxisLeft().setAxisMaxValue(mLevelChart.getLineData().getYMax() + 5);
-                            mLevelChart.getAxisLeft().setAxisMinValue(mLevelChart.getLineData().getYMin() - 5);
-                            mLevelChart.notifyDataSetChanged();
-                            mLevelChart.invalidate();
-                        }
-                        break;
-                    case R.id.lw_level:
-                        if (mLevelChart.getLineData().getDataSetCount() > 1) {
-                            mLevelChart.getLineData().removeDataSet(1);
-                            mLevelChart.getAxisLeft().setAxisMaxValue(mLevelChart.getLineData().getYMax() + 5);
-                            mLevelChart.getAxisLeft().setAxisMinValue(mLevelChart.getLineData().getYMin() - 5);
-                            mLevelChart.notifyDataSetChanged();
-                            mLevelChart.invalidate();
-                        }
-                        addCharakterystycznyLevel(LW);
-                        break;
-                    case R.id.mw2_level:
-                        if (mLevelChart.getLineData().getDataSetCount() > 1) {
-                            mLevelChart.getLineData().removeDataSet(1);
-                            mLevelChart.getAxisLeft().setAxisMaxValue(mLevelChart.getLineData().getYMax() + 5);
-                            mLevelChart.getAxisLeft().setAxisMinValue(mLevelChart.getLineData().getYMin() - 5);
-                            mLevelChart.notifyDataSetChanged();
-                            mLevelChart.invalidate();
-                        }
-                        addCharakterystycznyLevel(MW);
-                        break;
-                    case R.id.hw_level:
-                        if (mLevelChart.getLineData().getDataSetCount() > 1) {
-                            mLevelChart.getLineData().removeDataSet(1);
-                            mLevelChart.getAxisLeft().setAxisMaxValue(mLevelChart.getLineData().getYMax() + 5);
-                            mLevelChart.getAxisLeft().setAxisMinValue(mLevelChart.getLineData().getYMin() - 5);
-                            mLevelChart.notifyDataSetChanged();
-                            mLevelChart.invalidate();
-                        }
-                        addCharakterystycznyLevel(HW);
-                        break;
-                }
+            switch (checkedId) {
+                case R.id.nothing_level:
+                    if (mLevelChart.getLineData().getDataSetCount() > 1) {
+                        mLevelChart.getLineData().removeDataSet(1);
+                        mLevelChart.getAxisLeft().setAxisMaxValue(mLevelChart.getLineData().getYMax() + 5);
+                        mLevelChart.getAxisLeft().setAxisMinValue(mLevelChart.getLineData().getYMin() - 5);
+                        mLevelChart.notifyDataSetChanged();
+                        mLevelChart.invalidate();
+                    }
+                    break;
+                case R.id.lw_level:
+                    if (mLevelChart.getLineData().getDataSetCount() > 1) {
+                        mLevelChart.getLineData().removeDataSet(1);
+                        mLevelChart.getAxisLeft().setAxisMaxValue(mLevelChart.getLineData().getYMax() + 5);
+                        mLevelChart.getAxisLeft().setAxisMinValue(mLevelChart.getLineData().getYMin() - 5);
+                        mLevelChart.notifyDataSetChanged();
+                        mLevelChart.invalidate();
+                    }
+                    addCharakterystycznyLevel(LW);
+                    break;
+                case R.id.mw2_level:
+                    if (mLevelChart.getLineData().getDataSetCount() > 1) {
+                        mLevelChart.getLineData().removeDataSet(1);
+                        mLevelChart.getAxisLeft().setAxisMaxValue(mLevelChart.getLineData().getYMax() + 5);
+                        mLevelChart.getAxisLeft().setAxisMinValue(mLevelChart.getLineData().getYMin() - 5);
+                        mLevelChart.notifyDataSetChanged();
+                        mLevelChart.invalidate();
+                    }
+                    addCharakterystycznyLevel(MW);
+                    break;
+                case R.id.hw_level:
+                    if (mLevelChart.getLineData().getDataSetCount() > 1) {
+                        mLevelChart.getLineData().removeDataSet(1);
+                        mLevelChart.getAxisLeft().setAxisMaxValue(mLevelChart.getLineData().getYMax() + 5);
+                        mLevelChart.getAxisLeft().setAxisMinValue(mLevelChart.getLineData().getYMin() - 5);
+                        mLevelChart.notifyDataSetChanged();
+                        mLevelChart.invalidate();
+                    }
+                    addCharakterystycznyLevel(HW);
+                    break;
+            }
         };
 
 
         przeplywListner = (RadioGroup group, int checkedId) -> {
-                switch (checkedId) {
-                    case R.id.nothing_przeplyw:
-                        if (mPrzeplywChart.getLineData().getDataSetCount() > 1) {
-                            mPrzeplywChart.getLineData().removeDataSet(1);
-                            mPrzeplywChart.getAxisLeft().setAxisMaxValue(mPrzeplywChart.getLineData().getYMax() + 3);
-                            mPrzeplywChart.getAxisLeft().setAxisMinValue(mPrzeplywChart.getLineData().getYMin() - 3);
-                            mPrzeplywChart.notifyDataSetChanged();
-                            mPrzeplywChart.invalidate();
-                        }
-                        break;
-                    case R.id.lw_przeplyw:
-                        if (mPrzeplywChart.getLineData().getDataSetCount() > 1) {
-                            mPrzeplywChart.getLineData().removeDataSet(1);
-                            mPrzeplywChart.getAxisLeft().setAxisMaxValue(mPrzeplywChart.getLineData().getYMax() + 3);
-                            mPrzeplywChart.getAxisLeft().setAxisMinValue(mPrzeplywChart.getLineData().getYMin() - 3);
-                            mPrzeplywChart.notifyDataSetChanged();
-                            mPrzeplywChart.invalidate();
-                        }
-                        addCharakterystycznyPrzeplyw(LW);
-                        break;
-                    case R.id.mw2_przeplyw:
-                        if (mPrzeplywChart.getLineData().getDataSetCount() > 1) {
-                            mPrzeplywChart.getLineData().removeDataSet(1);
-                            mPrzeplywChart.getAxisLeft().setAxisMaxValue(mPrzeplywChart.getLineData().getYMax() + 3);
-                            mPrzeplywChart.getAxisLeft().setAxisMinValue(mPrzeplywChart.getLineData().getYMin() - 3);
-                            mPrzeplywChart.notifyDataSetChanged();
-                            mPrzeplywChart.invalidate();
-                        }
-                        addCharakterystycznyPrzeplyw(MW);
-                        break;
-                    case R.id.hw_przeplyw:
-                        if (mPrzeplywChart.getLineData().getDataSetCount() > 1) {
-                            mPrzeplywChart.getLineData().removeDataSet(1);
-                            mPrzeplywChart.getAxisLeft().setAxisMaxValue(mPrzeplywChart.getLineData().getYMax() + 3);
-                            mPrzeplywChart.getAxisLeft().setAxisMinValue(mPrzeplywChart.getLineData().getYMin() - 3);
-                            mPrzeplywChart.notifyDataSetChanged();
-                            mPrzeplywChart.invalidate();
-                        }
-                        addCharakterystycznyPrzeplyw(HW);
-                        break;
-                }
+            switch (checkedId) {
+                case R.id.nothing_przeplyw:
+                    if (mPrzeplywChart.getLineData().getDataSetCount() > 1) {
+                        mPrzeplywChart.getLineData().removeDataSet(1);
+                        mPrzeplywChart.getAxisLeft().setAxisMaxValue(mPrzeplywChart.getLineData().getYMax() + 3);
+                        mPrzeplywChart.getAxisLeft().setAxisMinValue(mPrzeplywChart.getLineData().getYMin() - 3);
+                        mPrzeplywChart.notifyDataSetChanged();
+                        mPrzeplywChart.invalidate();
+                    }
+                    break;
+                case R.id.lw_przeplyw:
+                    if (mPrzeplywChart.getLineData().getDataSetCount() > 1) {
+                        mPrzeplywChart.getLineData().removeDataSet(1);
+                        mPrzeplywChart.getAxisLeft().setAxisMaxValue(mPrzeplywChart.getLineData().getYMax() + 3);
+                        mPrzeplywChart.getAxisLeft().setAxisMinValue(mPrzeplywChart.getLineData().getYMin() - 3);
+                        mPrzeplywChart.notifyDataSetChanged();
+                        mPrzeplywChart.invalidate();
+                    }
+                    addCharakterystycznyPrzeplyw(LW);
+                    break;
+                case R.id.mw2_przeplyw:
+                    if (mPrzeplywChart.getLineData().getDataSetCount() > 1) {
+                        mPrzeplywChart.getLineData().removeDataSet(1);
+                        mPrzeplywChart.getAxisLeft().setAxisMaxValue(mPrzeplywChart.getLineData().getYMax() + 3);
+                        mPrzeplywChart.getAxisLeft().setAxisMinValue(mPrzeplywChart.getLineData().getYMin() - 3);
+                        mPrzeplywChart.notifyDataSetChanged();
+                        mPrzeplywChart.invalidate();
+                    }
+                    addCharakterystycznyPrzeplyw(MW);
+                    break;
+                case R.id.hw_przeplyw:
+                    if (mPrzeplywChart.getLineData().getDataSetCount() > 1) {
+                        mPrzeplywChart.getLineData().removeDataSet(1);
+                        mPrzeplywChart.getAxisLeft().setAxisMaxValue(mPrzeplywChart.getLineData().getYMax() + 3);
+                        mPrzeplywChart.getAxisLeft().setAxisMinValue(mPrzeplywChart.getLineData().getYMin() - 3);
+                        mPrzeplywChart.notifyDataSetChanged();
+                        mPrzeplywChart.invalidate();
+                    }
+                    addCharakterystycznyPrzeplyw(HW);
+                    break;
+            }
         };
+    }
+
+    public void loadNewDataToLevelChart(){
+
     }
 }
 

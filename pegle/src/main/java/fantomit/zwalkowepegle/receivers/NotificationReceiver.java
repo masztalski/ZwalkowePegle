@@ -12,6 +12,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
+
+import fantomit.zwalkowepegle.BuildConfig;
 import fantomit.zwalkowepegle.MainActivity;
 import fantomit.zwalkowepegle.R;
 
@@ -21,6 +25,7 @@ public class NotificationReceiver extends BroadcastReceiver {
     public static final String _NAME = "name";
     public static final String _dVAL = "dValue";
     public static final String _iVAL = "iValue";
+    public static final String _TYPE = "type";
 
     private boolean czyPoziom;
 
@@ -29,21 +34,27 @@ public class NotificationReceiver extends BroadcastReceiver {
         Bundle extras = intent.getExtras();
         int id = Integer.parseInt(extras.getString(_ID));
         String name = extras.getString(_NAME);
+        String typ = extras.getString(_TYPE);
         double przeplyw = -1;
         int poziom = -1;
-        if(extras.containsKey(_dVAL)){
+        if (extras.containsKey(_dVAL)) {
             przeplyw = extras.getDouble(_dVAL);
             czyPoziom = false;
-        } else if(extras.containsKey(_iVAL)){
+        } else if (extras.containsKey(_iVAL)) {
             poziom = extras.getInt(_iVAL);
             czyPoziom = true;
+        }
+
+        if(!BuildConfig.DEBUG) {
+            Answers.getInstance().logCustom(new CustomEvent("Notification sent")
+                    .putCustomAttribute(name, (czyPoziom ? Integer.toString(poziom) + "cm" : Double.toString(przeplyw) + "m3/s") + "\n" + "dolna granica: " + typ));
         }
 
         PendingIntent contentIntent = PendingIntent.getActivity(context, id, new Intent(context, MainActivity.class), 0);
 
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-        long[] pattern = {2,1000,500,2000,500,3000};
+        long[] pattern = {2, 1000, 500, 2000, 500, 3000};
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                 .setSmallIcon(R.drawable.ic_water_white_36dp)
                 .setContentTitle(name)
