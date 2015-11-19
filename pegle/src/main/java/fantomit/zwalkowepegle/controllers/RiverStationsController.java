@@ -37,11 +37,26 @@ public class RiverStationsController {
     public boolean isSorted = false;
 
     private String riverName;
+    private int riverId;
 
     private List<Station> stations;
 
     public void setView(RiverStationsInterface mView) {
         this.mView = mView;
+    }
+
+    public void loadStations() {
+        mView.showProgressSpinner();
+        if (stations == null) {
+            stations = new ArrayList<>();
+        } else {
+            stations.clear();
+        }
+        River r = repoRiver.findById(riverId);
+        riverName = r.getRiverName();
+        List<String> stationsId = r.getConnectedStations();
+        Stream.of(stationsId)
+                .forEach(id -> getStacja(id, stationsId.size()));
     }
 
     public void getStacja(String id, final int size) {
@@ -58,6 +73,8 @@ public class RiverStationsController {
                 station.setNotifCheckedId(s.getNotifCheckedId());
                 station.setDolnaGranicaPoziomu(s.getDolnaGranicaPoziomu());
                 station.setDolnaGranicaPrzeplywu(s.getDolnaGranicaPrzeplywu());
+                station.setLan(s.getLan());
+                station.setLon(s.getLon());
                 if (s.isUserCustomized()) {
                     station.setIsUserCustomized(true);
 //                        station.setLlw_poziom(s.getLlw_poziom());
@@ -77,21 +94,6 @@ public class RiverStationsController {
         }, new RetroFitErrorHelper(mView));
     }
 
-
-    public void loadStations(int riverId) {
-        mView.showProgressSpinner();
-        if (stations == null) {
-            stations = new ArrayList<>();
-        } else {
-            stations.clear();
-        }
-        River r = repoRiver.findById(riverId);
-        riverName = r.getRiverName();
-        List<String> stationsId = r.getConnectedStations();
-        Stream.of(stationsId)
-                .forEach(id -> getStacja(id, stationsId.size()));
-    }
-
     public List<Station> getStations() {
         return stations;
     }
@@ -102,5 +104,13 @@ public class RiverStationsController {
 
     public String getRiverName() {
         return riverName;
+    }
+
+    public int getRiverId() {
+        return riverId;
+    }
+
+    public void setRiverId(int riverId) {
+        this.riverId = riverId;
     }
 }

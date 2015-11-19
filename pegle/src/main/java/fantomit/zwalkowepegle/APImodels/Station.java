@@ -48,6 +48,16 @@ public class Station {
     private boolean isByDefaultCustomized = false;
     @DatabaseField
     private boolean notifByPrzeplyw = true;
+    @DatabaseField
+    private float lan;
+    @DatabaseField
+    private float lon;
+    @DatabaseField
+    private String notes = "";
+    @DatabaseField
+    private int lastPoziomTriger = -1;
+    @DatabaseField
+    private double lastPrzeplywTriger = -1.0;
     /*=======Przepływy charakteryczytczne=====*/
     @DatabaseField
     private double llw_przeplyw = -1.0;
@@ -74,6 +84,12 @@ public class Station {
     private String notifHint = "LLW";
     @DatabaseField
     private int notifCheckedId = -1;
+
+    public Station(){}
+
+    public Station(String id){
+        this.setId(id);
+    }
 
     /*====Gettery API===*/
 
@@ -269,6 +285,49 @@ public class Station {
         this.notifCheckedId = notifCheckedId;
     }
 
+    public float getLan() {
+        return lan;
+    }
+
+    public void setLan(float lan) {
+        this.lan = lan;
+    }
+
+    public float getLon() {
+        return lon;
+    }
+
+    public void setLon(float lon) {
+        this.lon = lon;
+    }
+
     /*====Gettery i Settery danych dodatkowych===*/
 
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public int getLastPoziomTriger() {
+        return lastPoziomTriger;
+    }
+
+    public void setLastPoziomTriger(int lastPoziomTriger) {
+        this.lastPoziomTriger = lastPoziomTriger;
+    }
+
+    public double getLastPrzeplywTriger() {
+        return lastPrzeplywTriger;
+    }
+
+    public void setLastPrzeplywTriger(double lastPrzeplywTriger) {
+        this.lastPrzeplywTriger = lastPrzeplywTriger;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 }

@@ -3,7 +3,9 @@ package fantomit.zwalkowepegle;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,6 +22,7 @@ import de.greenrobot.event.EventBus;
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.adapters.StationListAdapter;
 import fantomit.zwalkowepegle.controllers.RiverStationsController;
+import fantomit.zwalkowepegle.dialogs.NoteDialog;
 import fantomit.zwalkowepegle.interfaces.RiverStationsInterface;
 import fantomit.zwalkowepegle.utils.StationsLoadedEvent;
 import roboguice.activity.RoboActionBarActivity;
@@ -50,7 +53,8 @@ public class RiverStations extends RoboActionBarActivity implements RiverStation
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.primary)));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (getIntent().getExtras().containsKey("RIVER") && savedInstanceState == null) {
-            mController.loadStations(getIntent().getExtras().getInt("RIVER"));
+            mController.setRiverId(getIntent().getExtras().getInt("RIVER"));
+            mController.loadStations();
             getSupportActionBar().setTitle(mController.getRiverName());
         } else if (savedInstanceState != null) {
             refreshList();
@@ -66,8 +70,10 @@ public class RiverStations extends RoboActionBarActivity implements RiverStation
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            finish();
+        switch(item.getItemId()){
+            case android.R.id.home:
+                finish();
+                break;
         }
         return super.onOptionsItemSelected(item);
     }

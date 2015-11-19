@@ -19,7 +19,7 @@ import fantomit.zwalkowepegle.db.repositories.SettingsRepository;
 import fantomit.zwalkowepegle.db.repositories.StationRepository;
 import fantomit.zwalkowepegle.interfaces.StationDetailsInterface;
 import fantomit.zwalkowepegle.utils.RetroFitErrorHelper;
-import fantomit.zwalkowepegle.webservices.StationHistoryWebService;
+import fantomit.zwalkowepegle.webservices.WrotkaWebService;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -37,10 +37,12 @@ public class StationController {
     private SettingsRepository repoSettings;
 
     @Inject
-    private StationHistoryWebService stationHistoryWS;
+    private WrotkaWebService stationHistoryWS;
 
     @Inject
     private EventBus eventBus;
+
+    public String firstRecordDate;
 
     public boolean isTriggerFired = false;
 
@@ -53,7 +55,7 @@ public class StationController {
         mView.showProgressSpinner();
         mStacja = repoStacja.findById(id);
         Calendar todayDate = Calendar.getInstance();
-        todayDate.add(Calendar.HOUR_OF_DAY,1);
+        todayDate.add(Calendar.HOUR_OF_DAY, 1);
         Calendar beginDate = Calendar.getInstance();
         beginDate.add(Calendar.MONTH, -1); //data miesi¹c wczeœniej
         beginDate.set(Calendar.HOUR_OF_DAY, 0);
@@ -70,20 +72,27 @@ public class StationController {
         Log.e("StationController", "LoadHistoricStates: " + kind);
         Observable<List<MyRecord>> result = stationHistoryWS.getRecords(mStacja.getId(), kind, begin, end);
         result.observeOn(AndroidSchedulers.mainThread()).subscribe(myRecords -> {
-            if(kind.equals("level")) {
-                if (mLevelHistoricStates != null) {
-                    this.mLevelHistoricStates.addAll(0, myRecords);
-                } else {
-                    this.mLevelHistoricStates = myRecords;
+            if (kind.equals("level")) {
+                Log.e("StationController", "Pobrane stany");
+                if(myRecords != null && !myRecords.isEmpty()) {
+                    if (mLevelHistoricStates != null) {
+                        this.mLevelHistoricStates.addAll(0, myRecords);
+                    } else {
+                        this.mLevelHistoricStates = myRecords;
+                    }
+                    mView.loadDataToLevelChart();
                 }
-                mView.loadDataToLevelChart();
-            } else  {
-                if (getmPrzeplywHistoricStates() != null) {
-                    this.getmPrzeplywHistoricStates().addAll(0, myRecords);
-                } else {
-                    this.setmPrzeplywHistoricStates(myRecords);
+
+            } else {
+                Log.e("StationController", "Pobrane przeplywy");
+                if(myRecords != null && !myRecords.isEmpty()) {
+                    if (mPrzeplywHistoricStates != null) {
+                        this.mPrzeplywHistoricStates.addAll(0, myRecords);
+                    } else {
+                        this.mPrzeplywHistoricStates = myRecords;
+                    }
+                    mView.loadDataToPrzeplywChart();
                 }
-                mView.loadDataToPrzeplywChart();
             }
         }, new RetroFitErrorHelper(mView));
     }
@@ -106,7 +115,7 @@ public class StationController {
         }
         mStacja.setIsFav(true);
         boolean status = repoStacja.createOrUpdate(mStacja);
-        if(!BuildConfig.DEBUG) {
+        if (!BuildConfig.DEBUG) {
             Answers.getInstance().logCustom(new CustomEvent("Favourites added")
                     .putCustomAttribute("Station", mStacja.getName()));
         }

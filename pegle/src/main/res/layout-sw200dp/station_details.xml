@@ -56,6 +56,22 @@
                     app:rowCount="2">
 
                     <TextView
+                        android:id="@+id/updateDate"
+                        android:layout_width="0dp"
+                        app:layout_columnWeight="1"
+                        app:layout_columnSpan="3"
+                        app:layout_column="0"
+                        app:layout_row="0"
+                        app:layout_gravity="fill"
+                        tools:text="Dane z: 2015-10-05 16:20 GMT"
+                        android:lineSpacingExtra="2dp"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                        android:gravity="center"
+                        android:textColor="#000000"
+
+                        />
+
+                    <TextView
                         android:id="@+id/currentLevel"
                         android:layout_width="0dp"
                         android:layout_height="40dp"
@@ -67,8 +83,13 @@
                         app:layout_column="0"
                         app:layout_columnWeight="1.3"
                         app:layout_gravity="fill"
-                        app:layout_row="0"
+                        app:layout_row="1"
                         tools:text="143 cm" />
+
+                    <android.support.v7.widget.Space
+                        app:layout_column="1"
+                        app:layout_columnWeight="0.05"
+                        app:layout_rowSpan="2" />
 
                     <TextView
                         android:id="@+id/currentPrzewplyw"
@@ -78,42 +99,13 @@
                         android:gravity="center"
                         android:lineSpacingExtra="2dp"
                         android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                        app:layout_columnWeight="1.3"
                         android:textColor="#de000000"
-                        app:layout_column="0"
+                        app:layout_column="2"
                         app:layout_gravity="fill"
                         app:layout_row="1"
                         tools:text="5 cm3/s" />
 
-                    <android.support.v7.widget.Space
-                        app:layout_column="1"
-                        app:layout_columnWeight="0.05"
-                        app:layout_rowSpan="2" />
-
-
-                    <TextView
-                        android:id="@+id/alarmLevel"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:drawableLeft="@drawable/ic_error_black_24dp"
-                        android:drawablePadding="10dp"
-                        android:gravity="center_vertical"
-                        app:layout_column="2"
-                        app:layout_columnWeight="1.3"
-                        app:layout_gravity="fill"
-                        app:layout_row="0"
-                        tools:text="300cm" />
-
-                    <TextView
-                        android:id="@+id/warningLevel"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:drawableLeft="@drawable/ic_report_problem_black_24dp"
-                        android:drawablePadding="10dp"
-                        android:gravity="center_vertical"
-                        app:layout_column="2"
-                        app:layout_gravity="fill"
-                        app:layout_row="1"
-                        tools:text="230cm" />
 
                     <ImageView
                         android:id="@+id/trend"

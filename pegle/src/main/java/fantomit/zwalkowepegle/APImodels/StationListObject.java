@@ -8,8 +8,8 @@ public class StationListObject {
     private String n;   //nazwa stacji
     private int a;  //??
     private String s;   //opisowy stan wody na stacji -> Constants->hydroStatusLabels
-    private double lo;  //Longitude
-    private double la;  //Langitude
+    private float lo;  //Longitude
+    private float la;  //Langitude
 
     public String getData() {
         return cd;
@@ -35,11 +35,11 @@ public class StationListObject {
         return s;
     }
 
-    public double getLongitude() {
+    public float getLongitude() {
         return lo;
     }
 
-    public double getLangitude() {
+    public float getLangitude() {
         return la;
     }
 }

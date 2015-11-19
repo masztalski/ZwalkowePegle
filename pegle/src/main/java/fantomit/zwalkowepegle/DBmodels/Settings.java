@@ -12,7 +12,7 @@ public class Settings {
     @DatabaseField
     private String wojewodztwo = "dolnoœl¹skie";
     @DatabaseField
-    private boolean hasWojewodztwoChanged = false;
+    private boolean hasWojewodztwoChanged = true;
     @DatabaseField
     private int time = 60;
     @DatabaseField

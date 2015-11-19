@@ -8,8 +8,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.internal.widget.ActionBarOverlayLayout;
-import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -36,6 +34,7 @@ import de.greenrobot.event.EventBus;
 import fantomit.zwalkowepegle.DBmodels.River;
 import fantomit.zwalkowepegle.adapters.RiverListAdapter;
 import fantomit.zwalkowepegle.controllers.MainController;
+import fantomit.zwalkowepegle.dialogs.ChooseWojewodztwoDialog;
 import fantomit.zwalkowepegle.dialogs.ConfirmDeleteDialog;
 import fantomit.zwalkowepegle.dialogs.ConfirmDownloadDialog;
 import fantomit.zwalkowepegle.dialogs.ConfirmExitDialog;
@@ -72,11 +71,18 @@ public class MainActivity extends RoboActionBarActivity implements MainActivityI
         mController.setView(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
         loadingTime = Calendar.getInstance().getTimeInMillis();
-        mController.getListaStacji();
+        if(mController.hasWojewodztwoChanged()) {
+            ChooseWojewodztwoDialog dialog = new ChooseWojewodztwoDialog();
+            FragmentManager fm = getSupportFragmentManager();
+            dialog.show(fm, "Choose Wojwodztwo Dialog");
+        } else{
+            mController.getListaStacji();
+        }
+        //mController.getListaStacji();
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.primary)));
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         getSupportActionBar().setTitle(getString(R.string.app_name));
-        getSupportActionBar().setSubtitle("woj. " + mController.getWojewodztwoFromSettings());
+
 
         lvRivers.setOnItemClickListener((AdapterView<?> parent, View view, int position, long id) -> {
                     Intent i = new Intent(MainActivity.this, RiverStations.class);
@@ -210,6 +216,7 @@ public class MainActivity extends RoboActionBarActivity implements MainActivityI
     public void displayRivers() {
         lvRivers.setEnabled(true);
         setRequestedOrientation(orientation);
+        getSupportActionBar().setSubtitle("woj. " + mController.getWojewodztwoFromSettings());
 
         if (!mController.isSorted) {
             Comparator<River> ALPHABETICAL_ORDER1 = (River object1, River object2) -> {
@@ -284,11 +291,11 @@ public class MainActivity extends RoboActionBarActivity implements MainActivityI
 
         Log.e("VERSION", curVersion + " " + Integer.toString(curVersionCode));
         //Start Update Service
-//        Intent i = new Intent();
-//        i.putExtra("verName", curVersion);
-//        i.putExtra("verCode", curVersionCode);
-//        i.setAction(UpdateReceiver._UPDATE);
-//        sendBroadcast(i);
+        Intent i = new Intent();
+        i.putExtra("verName", curVersion);
+        i.putExtra("verCode", curVersionCode);
+        i.setAction(UpdateReceiver._UPDATE);
+        sendBroadcast(i);
         //=====
     }
 

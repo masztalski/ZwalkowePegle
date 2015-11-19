@@ -1,6 +1,7 @@
 package fantomit.zwalkowepegle.adapters;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -22,14 +23,12 @@ public class RiverListAdapter extends ArrayAdapter<River> {
     private LayoutInflater inflater;
     public HashMap<String, Integer> plywalnosc;
     private SparseBooleanArray mSelection = new SparseBooleanArray();
-    private Context context;
 
     public RiverListAdapter(Context context, List<River> rivers, HashMap<String, Integer> plywalnosc) {
         super(context, R.layout.river_list_item, rivers);
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.rivers = rivers;
         this.plywalnosc = plywalnosc;
-        this.context = context;
     }
 
     @Override
@@ -62,10 +61,10 @@ public class RiverListAdapter extends ArrayAdapter<River> {
         }
 
         if (mSelection.get(position)) {
-            convertView.setBackgroundColor(context.getResources().getColor(android.R.color.holo_blue_light));// this is a selected position so make it red
+            convertView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.holo_blue_light));// this is a selected position so make it red
             Log.e("ADAPTER", "Position " + Integer.toString(position) + " is checked");
         } else {
-            convertView.setBackgroundColor(context.getResources().getColor(android.R.color.background_light));
+            convertView.setBackgroundColor(ContextCompat.getColor(getContext(), android.R.color.background_light));
         }
 
         return convertView;

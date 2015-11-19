@@ -1,16 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
-      xmlns:tools="http://schemas.android.com/tools"
-      tools:context=".StationDetails">
-      <item android:id="@+id/action_edit"
-            android:title="Edytuj dane"
-            android:orderInCategory="9"
-            android:icon="@drawable/ic_pencil_white_36dp"
-            app:showAsAction="always"/>
-    <item android:id="@+id/action_favourite"
-          android:title="Ulubione"
-          android:orderInCategory="10"
-          android:icon="@drawable/ic_star_outline_white_36dp"
-          app:showAsAction="always"/>
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".StationDetails">
+    <item
+        android:id="@+id/action_map"
+        android:icon="@drawable/ic_map_white_36dp"
+        android:orderInCategory="7"
+        android:title="Pokaż na mapie"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_edit"
+        android:icon="@drawable/ic_pencil_white_36dp"
+        android:orderInCategory="9"
+        android:title="Edytuj dane"
+        app:showAsAction="always">
+        <menu>
+            <item
+                android:id="@+id/action_edit"
+                android:icon="@drawable/ic_pencil_black_36dp"
+                android:orderInCategory="9"
+                android:title="Edytuj dane"
+                app:showAsAction="always"/>
+            <item
+                android:id="@+id/action_note"
+                android:icon="@drawable/ic_clipboard_text_black_36dp"
+                android:orderInCategory="8"
+                android:title="Zrób notatkę"
+                app:showAsAction="always" />
+        </menu>
+
+        </item>
+    <item
+        android:id="@+id/action_favourite"
+        android:icon="@drawable/ic_star_outline_white_36dp"
+        android:orderInCategory="10"
+        android:title="Ulubione"
+        app:showAsAction="always" />
 </menu>

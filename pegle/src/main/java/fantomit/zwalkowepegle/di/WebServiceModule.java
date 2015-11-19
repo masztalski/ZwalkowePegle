@@ -10,7 +10,7 @@ import fantomit.zwalkowepegle.ZwalkiApplication;
 import fantomit.zwalkowepegle.utils.RetroFitErrorHelper;
 import fantomit.zwalkowepegle.webservices.ListaStacjiWebService;
 import fantomit.zwalkowepegle.webservices.StacjaWebService;
-import fantomit.zwalkowepegle.webservices.StationHistoryWebService;
+import fantomit.zwalkowepegle.webservices.WrotkaWebService;
 import fantomit.zwalkowepegle.webservices.UpdateWebService;
 import retrofit.RestAdapter;
 import retrofit.client.Client;
@@ -23,7 +23,7 @@ public class WebServiceModule extends AbstractModule {
         bind(ListaStacjiWebService.class).toProvider(ListaStacjiWSProvider.class).in(Singleton.class);
         bind(StacjaWebService.class).toProvider(StacjaWSProvider.class).in(Singleton.class);
         bind(UpdateWebService.class).toProvider(UpdateWSProvider.class).in(Singleton.class);
-        bind(StationHistoryWebService.class).toProvider(StationHistoryWSProvider.class).in(Singleton.class);
+        bind(WrotkaWebService.class).toProvider(StationHistoryWSProvider.class).in(Singleton.class);
     }
 
     public static class ListaStacjiWSProvider implements Provider<ListaStacjiWebService> {
@@ -75,19 +75,19 @@ public class WebServiceModule extends AbstractModule {
         }
     }
 
-    public static class StationHistoryWSProvider implements Provider<StationHistoryWebService> {
+    public static class StationHistoryWSProvider implements Provider<WrotkaWebService> {
         @Inject
         Client client;
 
         @Override
-        public StationHistoryWebService get() {
+        public WrotkaWebService get() {
             RestAdapter.Builder builder = new RestAdapter.Builder()
                     .setEndpoint(ZwalkiApplication.MY_API_SOURCE)
                     .setClient(client)
                     .setErrorHandler(new RetroFitErrorHelper(null))
                     .setLogLevel(RestAdapter.LogLevel.FULL);
             RestAdapter restAdapter = builder.build();
-            return restAdapter.create(StationHistoryWebService.class);
+            return restAdapter.create(WrotkaWebService.class);
         }
     }
 }

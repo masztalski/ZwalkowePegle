@@ -1,6 +1,5 @@
 package fantomit.zwalkowepegle.controllers;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.annimon.stream.Collectors;
@@ -12,7 +11,6 @@ import com.google.inject.Singleton;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.FutureTask;
@@ -20,6 +18,7 @@ import java.util.concurrent.FutureTask;
 import de.greenrobot.event.EventBus;
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.APImodels.StationListObject;
+import fantomit.zwalkowepegle.APImodels.WojStation;
 import fantomit.zwalkowepegle.BuildConfig;
 import fantomit.zwalkowepegle.DBmodels.River;
 import fantomit.zwalkowepegle.DBmodels.Settings;
@@ -31,8 +30,10 @@ import fantomit.zwalkowepegle.interfaces.MainActivityInterface;
 import fantomit.zwalkowepegle.utils.AktualizacjaEvent;
 import fantomit.zwalkowepegle.utils.RetroFitErrorHelper;
 import fantomit.zwalkowepegle.utils.UsuwanieRzekiEvent;
+import fantomit.zwalkowepegle.utils.WojewodztwoChoosedEvent;
 import fantomit.zwalkowepegle.webservices.ListaStacjiWebService;
 import fantomit.zwalkowepegle.webservices.StacjaWebService;
+import fantomit.zwalkowepegle.webservices.WrotkaWebService;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -46,6 +47,8 @@ public class MainController {
     @Inject
     private StacjaWebService stacjaWS;
     @Inject
+    private WrotkaWebService wrotkaWS;
+    @Inject
     private RiverRepository repoRiver;
     @Inject
     private StationRepository repoStacja;
@@ -58,7 +61,7 @@ public class MainController {
     public HashMap<String, Integer> plywalnoscRzek;
 
     private List<StationListObject> mListaStacji;
-    private List<Station> mWojewodzkieStacje;
+    private List<WojStation> mWojewodzkieStacje;
     private List<River> mRivers;
     private int howManyStationsTested = 0;
     private boolean isDivided = false;
@@ -79,6 +82,11 @@ public class MainController {
         }
     }
 
+    public void onEvent(WojewodztwoChoosedEvent event){
+        mWojewodztwo = event.wojewodztwo;
+        getListaStacji();
+    }
+
     public void getListaStacji() {
         mView.showProgressSpinner();
         mRivers = repoRiver.getAll();
@@ -86,25 +94,28 @@ public class MainController {
             mView.displayToast("B³¹d bazy danych. Odinstaluj i zainstaluj aplikacjê ponownie");
             return;
         }
-        mWojewodztwo = repoSettings.getSettings().getWojewodztwo();
         if (mRivers == null || mRivers.isEmpty() || repoSettings.getSettings().isHasWojewodztwoChanged()) {
+            mWojewodztwo = repoSettings.getSettings().getWojewodztwo();
             mRivers.clear();
             repoRiver.deleteAll();
             isDivided = false;
             isSorted = false;
-            final Observable<List<StationListObject>> result = listaWS.getListaStacji();
+
             Settings set = repoSettings.getSettings();
             set.setHasWojewodztwoChanged(false);
             repoSettings.createOrUpdate(set);
 
-            result.observeOn(AndroidSchedulers.mainThread()).subscribe(stationListObjects -> {
+            Observable<List<WojStation>> result = wrotkaWS.getStations(set.getWojewodztwo());
+
+            result.observeOn(AndroidSchedulers.mainThread()).subscribe(stations -> {
                 Log.i("Retrofit", "success");
-                mListaStacji = stationListObjects;
-                if (mListaStacji != null && !mListaStacji.isEmpty()) {
-                    setWojewodztwo();
-                } else {
-                    Log.e("FANTOM", "brak pobranych stacji");
+                howManyStationsTested = 0;
+                if (!isDivided) mWojewodzkieStacje = new ArrayList<>();
+                for(WojStation stacja : stations){
+                    saveStationToRepo(stacja);
+                    //getStacja(stacja.getStation_id(), stations.size());
                 }
+                sortRivers(mWojewodzkieStacje);
             }, new RetroFitErrorHelper(null));
         } else {
             isDivided = true;
@@ -112,20 +123,20 @@ public class MainController {
         }
     }
 
-    private void setWojewodztwo() {
-        if (BuildConfig.DEBUG)
-            Log.e("FANTOM", "Set " + repoSettings.getSettings().getWojewodztwo());
-        howManyStationsTested = 0;
-        if (mView != null)
-            mView.displayProgress(R.string.msg_setWojewodztwo, null);
-        Stream.of(mListaStacji)
-                .forEach((StationListObject s) -> getStacja(s.getId()));
+//    private void setWojewodztwo() {
+//        if (BuildConfig.DEBUG)
+//            Log.e("FANTOM", "Set " + repoSettings.getSettings().getWojewodztwo());
+//        howManyStationsTested = 0;
+//        if (mView != null)
+//            mView.displayProgress(R.string.msg_setWojewodztwo, null);
+//        Stream.of(mListaStacji)
+//                .forEach((StationListObject s) -> getStacja(s.getId()));
+//
+//        if (BuildConfig.DEBUG)
+//            Log.e("DOWNLOAD", "Downloaded " + Integer.toString(mListaStacji.size()) + " stations");
+//    }
 
-        if (BuildConfig.DEBUG)
-            Log.e("DOWNLOAD", "Downloaded " + Integer.toString(mListaStacji.size()) + " stations");
-    }
-
-    public void getStacja(String id) {
+    public void getStacja(String id, int size ) {
         Observable<Station> result = stacjaWS.getStacja(id);
         if (!isDivided) mWojewodzkieStacje = new ArrayList<>();
 
@@ -133,14 +144,11 @@ public class MainController {
                 .subscribe(station -> {
                     if (station != null && !isDivided) {
                         howManyStationsTested++;
-                        if (mWojewodztwo.equals(station.getStatus().getProvince())) {
-                            Log.e("SORTED", "Stacja " + station.getName() + " dopasowana");
-                            if (mView != null)
-                                mView.displayProgress(0, "Stacja " + station.getName() + " dopasowana");
-                            saveStationToRepo(station);
-                        }
+                        if (mView != null)
+                            mView.displayProgress(0, "Stacja " + station.getName() + " dopasowana");
 
-                        if (howManyStationsTested == mListaStacji.size()) {
+
+                        if (howManyStationsTested == size) {
                             sortRivers(mWojewodzkieStacje);
                             if (BuildConfig.DEBUG)
                                 Log.e("TESTED", "Znaleziono: " + Integer.toString(mWojewodzkieStacje.size())
@@ -150,34 +158,37 @@ public class MainController {
                 }, new RetroFitErrorHelper(mView));
     }
 
-    private void saveStationToRepo(Station station){
-        mWojewodzkieStacje.add(station);
-        Station s = repoStacja.findById(station.getId());
-        if (s != null) {
-            station.setIsFav(s.isFav());
-            station.setIsUserCustomized(s.isUserCustomized());
-            station.setNotifByPrzeplyw(s.isNotifByPrzeplyw());
-            station.setNotifCheckedId(s.getNotifCheckedId());
-            if (s.getDolnaGranicaPrzeplywu() != -1.0) {
-                station.setDolnaGranicaPrzeplywu(s.getDolnaGranicaPrzeplywu());
-            } else {
-                station.setDolnaGranicaPrzeplywu(s.getLw_przeplyw() != -1.0 ? s.getLw_przeplyw() : s.getLowDischargeValue());
-            }
-            if (s.getDolnaGranicaPoziomu() != -1) {
-                station.setDolnaGranicaPoziomu(s.getDolnaGranicaPoziomu());
-            } else {
-                Double temp = new Double(s.getStatus().getLowValue());
-                station.setDolnaGranicaPoziomu(s.getLw_poziom() != -1 ? s.getLw_poziom() : temp.intValue());
-            }
-        } else {
-            Double temp = new Double(station.getStatus().getLowValue());
-            station.setDolnaGranicaPoziomu(temp.intValue());
-            station.setDolnaGranicaPrzeplywu(station.getLowDischargeValue());
+    private void saveStationToRepo(WojStation wojStation){
+        mWojewodzkieStacje.add(wojStation);
+        Station s = repoStacja.findById(wojStation.getStation_id());
+//        if (s != null) {
+//            station.setIsFav(s.isFav());
+//            station.setIsUserCustomized(s.isUserCustomized());
+//            station.setNotifByPrzeplyw(s.isNotifByPrzeplyw());
+//            station.setNotifCheckedId(s.getNotifCheckedId());
+//            if (s.getDolnaGranicaPrzeplywu() != -1.0) {
+//                station.setDolnaGranicaPrzeplywu(s.getDolnaGranicaPrzeplywu());
+//            } else {
+//                station.setDolnaGranicaPrzeplywu(s.getLw_przeplyw() != -1.0 ? s.getLw_przeplyw() : s.getLowDischargeValue());
+//            }
+//            if (s.getDolnaGranicaPoziomu() != -1) {
+//                station.setDolnaGranicaPoziomu(s.getDolnaGranicaPoziomu());
+//            } else {
+//                Double temp = Double.valueOf(s.getStatus().getLowValue());
+//                station.setDolnaGranicaPoziomu(s.getLw_poziom() != -1 ? s.getLw_poziom() : temp.intValue());
+//            }
+//        } else
+        if(s == null){
+            Station stacjaDB = new Station();
+            stacjaDB.setId(wojStation.getStation_id());
+            Double temp = Double.valueOf(wojStation.getLowValue());
+            stacjaDB.setDolnaGranicaPoziomu(temp.intValue());
+            stacjaDB.setDolnaGranicaPrzeplywu(wojStation.getLowDischargeValue());
+            repoStacja.createOrUpdate(stacjaDB);
         }
-        repoStacja.createOrUpdate(station);
     }
 
-    private void sortRivers(List<Station> stacje) {
+    private void sortRivers(List<WojStation> stacje) {
         Log.e("FANTOM", "sortRivers");
         if (mView != null)
             mView.displayProgress(R.string.msg_SortRivers, null);
@@ -187,20 +198,18 @@ public class MainController {
         FutureTask<List<River>> sorting = new FutureTask<>(() -> {
             Stream.of(stacje)
                     .forEach(stacja -> {
-                        String riverName = stacja.getStatus().getRiver();
+                        String riverName = stacja.getRiver();
                         if (!nazwyRzek.contains(riverName)) {
                             River r = new River();
                             r.setRiverName(riverName);
-                            r.addConnectedStation(stacja.getId());
-                            r.setTrend(stacja.getTrend());
+                            r.addConnectedStation(stacja.getStation_id());
                             nazwyRzek.add(riverName);
                             rzeki.add(r);
                         } else {
                             int i = 0;
                             for (River r : rzeki) {
                                 if (r.getRiverName().equals(riverName)) {
-                                    r.addConnectedStation(stacja.getId());
-                                    r.setTrend(stacja.getTrend());
+                                    r.addConnectedStation(stacja.getStation_id());
                                     rzeki.set(i, r);
                                 }
                                 i++;
@@ -275,6 +284,9 @@ public class MainController {
                                 for (StationListObject station : filteredList) {
                                     Station s = repoStacja.findById(station.getId());
                                     if (s != null) {
+                                        s.setLan(station.getLangitude());
+                                        s.setLon(station.getLongitude());
+                                        repoStacja.createOrUpdate(s);
                                         if (station.getPoziom() >= s.getDolnaGranicaPoziomu()) {
                                             i++;
                                             plywalnoscRzek.put(river.getRiverId(), i);

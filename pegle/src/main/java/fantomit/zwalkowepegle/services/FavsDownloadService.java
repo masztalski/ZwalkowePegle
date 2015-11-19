@@ -94,9 +94,13 @@ public class FavsDownloadService extends RoboService {
                             }
                             List<PrzeplywRecord> przeplywRecords = station.getDischargeRecords();
 
-                            if (station.isNotifByPrzeplyw() && przeplywRecords.get(przeplywRecords.size() - 1).getValue() >= station.getDolnaGranicaPrzeplywu()) {
+                            if (s != null && station.isNotifByPrzeplyw() && s.getLastPrzeplywTriger() != przeplywRecords.get(przeplywRecords.size() - 1).getValue()
+                                    && przeplywRecords.get(przeplywRecords.size() - 1).getValue() >= station.getDolnaGranicaPrzeplywu()) {
+                                s.setLastPrzeplywTriger(przeplywRecords.get(przeplywRecords.size() - 1).getValue());
                                 sendNotification(station.getId(), station.getName(), "przep³yw > " + Double.toString(station.getDolnaGranicaPrzeplywu()), przeplywRecords.get(przeplywRecords.size() - 1).getValue(), -1);
-                            } else if (!station.isNotifByPrzeplyw() && station.getStatus().getCurrentValue() >= station.getDolnaGranicaPoziomu()) {
+                            } else if (s != null && !station.isNotifByPrzeplyw() && s.getLastPoziomTriger() != station.getStatus().getCurrentValue()
+                                    && station.getStatus().getCurrentValue() >= station.getDolnaGranicaPoziomu()) {
+                                s.setLastPoziomTriger(station.getStatus().getCurrentValue());
                                 sendNotification(station.getId(), station.getName(), "poziom > " + Integer.toString(station.getDolnaGranicaPoziomu()), -1.0, station.getStatus().getCurrentValue());
                             }
                         }, new RetroFitErrorHelper(null));

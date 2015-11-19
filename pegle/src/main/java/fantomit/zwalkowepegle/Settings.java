@@ -96,23 +96,20 @@ public class Settings extends RoboActionBarActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
-                    case 0: //15 minut
-                        mController.timeOfDownloading = 15;
-                        break;
-                    case 1: //30 minut
-                        mController.timeOfDownloading = 30;
-                        break;
-                    case 2: //1 godzina
+                    case 0: //1 godzina
                         mController.timeOfDownloading = 60;
                         break;
-                    case 3: //2 godziny
-                        mController.timeOfDownloading = 2 * 60;
+                    case 1: //2 godziny
+                        mController.timeOfDownloading = 2*60;
                         break;
-                    case 4: //3 godziny
-                        mController.timeOfDownloading = 3 * 60;
+                    case 2: //3 godziny
+                        mController.timeOfDownloading = 3*60;
+                        break;
+                    case 3: //1 dzieñ
+                        mController.timeOfDownloading = 24 * 60;
                         break;
                     default:
-                        mController.timeOfDownloading = 30;
+                        mController.timeOfDownloading = 60;
 
                 }
             }
@@ -159,7 +156,7 @@ public class Settings extends RoboActionBarActivity {
         );
 
         apply.setOnClickListener((View v) -> {
-                    if (mController.timeOfDownloading != 30) {
+                    if (mController.timeOfDownloading != 60) {
                         Intent i = new Intent();
                         i.setAction(FavsDownloadReceiver._ACTION);
                         sendBroadcast(i);
@@ -219,23 +216,20 @@ public class Settings extends RoboActionBarActivity {
         }
 
         switch (set.getTime()) {
-            case 15: //15 minut
+            case 60: //1 godzina
                 spinTime.setSelection(0);
                 break;
-            case 30: //30 minut
+            case 2*60: //2 godziny
                 spinTime.setSelection(1);
                 break;
-            case 60: //1 godzina
+            case 3*60: //3 godziny
                 spinTime.setSelection(2);
                 break;
-            case 2 * 60: //2 godziny
+            case 24 * 60: //1 dzieñ
                 spinTime.setSelection(3);
                 break;
-            case 3 * 60: //3 godziny
-                spinTime.setSelection(4);
-                break;
             default:
-                spinTime.setSelection(2);
+                spinTime.setSelection(0);
         }
     }
 

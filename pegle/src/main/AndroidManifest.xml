@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
 
     <application
         android:name=".ZwalkiApplication"
@@ -79,8 +80,12 @@
             android:name="io.fabric.ApiKey"
             android:value="32085c15f5ecb458cf8de061a391fc277ffee9b1" />
         <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="32085c15f5ecb458cf8de061a391fc277ffee9b1" />
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCYbd6EPVPT0oTFl16STaxDWHaZjuMu5tk"
+            />
     </application>
 
 </manifest>

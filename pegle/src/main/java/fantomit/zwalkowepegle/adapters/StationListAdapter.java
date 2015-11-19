@@ -1,6 +1,7 @@
 package fantomit.zwalkowepegle.adapters;
 
 import android.content.Context;
+import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,11 +57,11 @@ public class StationListAdapter extends ArrayAdapter<Station> {
         String trend = s.getTrend();
         /*==========Przy ustawieniu customowych poziomów charakterystycznych dla stacji=========*/
         if (s.getLw_poziom() != -1 && s.getLw_poziom() < s.getStatus().getCurrentValue()) {
-            riverHolder.mLevel.setTextColor(getContext().getResources().getColor(R.color.up));
+            riverHolder.mLevel.setTextColor(ContextCompat.getColor(getContext(),R.color.up));
         } else if (s.getLw_poziom() != -1) {
-            riverHolder.mLevel.setTextColor(getContext().getResources().getColor(R.color.down));
+            riverHolder.mLevel.setTextColor(ContextCompat.getColor(getContext(),R.color.down));
         } else {
-            riverHolder.mLevel.setTextColor(getContext().getResources().getColor(R.color.unknown));
+            riverHolder.mLevel.setTextColor(ContextCompat.getColor(getContext(),R.color.unknown));
         }
         if (trend.equals("const")) {
             riverHolder.mTrend.setImageResource(R.drawable.ic_trending_neutral_black_48dp);

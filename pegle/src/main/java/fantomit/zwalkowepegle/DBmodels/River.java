@@ -14,11 +14,10 @@ public class River {
     private String riverName;
     @DatabaseField(id = false, foreign = false, dataType = DataType.SERIALIZABLE)
     private ArrayList<String> connectedStations; //id przypisanych stacji
-    @DatabaseField
-    private String trend;
     /*===Custom Data===*/
     @DatabaseField
     private String idStacjiCharakterycznej = "-1";
+
 
     public River() {
         connectedStations = new ArrayList<>();
@@ -55,13 +54,6 @@ public class River {
         connectedStations.add(id);
     }
 
-    public String getTrend() {
-        return trend;
-    }
-
-    public void setTrend(String trend) {
-        this.trend = trend;
-    }
 
     public String getIdStacjiCharakterycznej() {
         return idStacjiCharakterycznej;

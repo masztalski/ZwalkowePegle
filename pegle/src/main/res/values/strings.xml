@@ -38,11 +38,10 @@
     </string-array>
 
     <string-array name="interwal">
-        <item>co 15 min.</item>
-        <item>co 30 min.</item>
         <item>co 1 godzina</item>
         <item>co 2 godziny</item>
         <item>co 3 godziny</item>
+        <item>co 1 dzień</item>
     </string-array>
 
     <string name="id">id</string>
@@ -59,4 +58,5 @@
     <string name="msg_SortRivers">Jeszcze chwila, dopasowuję stacje do rzek w wybranym województwie</string>
     <string name="msg_setWojewodztwo">Rozpoczynam pobierać stacje do posortowania(ok. 600 stacji)</string>
     <string name="no_data_msg">Brak dostępnych danych</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

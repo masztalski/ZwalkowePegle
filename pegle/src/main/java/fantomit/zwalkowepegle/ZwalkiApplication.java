@@ -17,7 +17,7 @@ import roboguice.RoboGuice;
 public class ZwalkiApplication extends Application {
 
     public static final String API_ENDPOINT = "http://monitor.pogodynka.pl/api";
-    public static final String MY_API_SOURCE = "http://wrotka.pwr.wroc.pl";
+    public static final String MY_API_SOURCE = "http://wrotka.pwr.edu.pl";
     //public static final String BUGANALYTICS_KEY = "57a3c03
 
     @Override
