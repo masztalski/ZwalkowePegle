@@ -1,0 +1,18 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=7E:9E:8C:06:29:EF:D1:7C:20:60:77:53:B7:ED:83:65:60:D0:EE:33%3Bfantomit.zwalkowepegle
+
+    You can also add your credentials to an existing key, using this line:
+    7E:9E:8C:06:29:EF:D1:7C:20:60:77:53:B7:ED:83:65:60:D0:EE:33;fantomit.zwalkowepegle
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+</resources>

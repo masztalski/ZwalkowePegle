@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="fantomit.zwalkowepegle" >
+
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
+    <application
+        android:name=".ZwalkiApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/logo_apk"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+
+        <!-- Konfiguracja RoboBlender -->
+        <meta-data android:name="roboguice.annotations.packages" android:value="fantomit.zwalkowepegle"/>
+
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".RiverStations"
+                android:screenOrientation="portrait"
+                  android:label="@string/app_name"
+                  />
+        <activity android:name=".StationDetails"
+                  android:label="@string/app_name"
+            />
+        <activity android:name=".Settings"
+            android:label="Ustawienia"/>
+        <receiver
+            android:name=".receivers.FavsDownloadReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="akcja" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".receivers.NotificationReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="notify" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".services.FavsDownloadService"/>
+        <receiver
+            android:name=".receivers.UpdateReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="update" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".receivers.OnApkDownloadComplete"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
+            </intent-filter>
+        </receiver>
+        <service android:name=".services.UpdateService"/>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="32085c15f5ecb458cf8de061a391fc277ffee9b1" />
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCYbd6EPVPT0oTFl16STaxDWHaZjuMu5tk"
+            />
+    </application>
+
+</manifest>

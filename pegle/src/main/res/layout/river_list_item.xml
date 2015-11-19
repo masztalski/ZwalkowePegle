@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="horizontal"
+              android:padding="16dp"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:gravity="center_vertical"
+        android:text="Odra"
+        android:id="@+id/tvName"
+        />
+
+    <TextView
+        android:id="@+id/tvPlywalnoscRzeki"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:layout_alignRight="@+id/tvRiverId"
+        android:layout_toLeftOf="@+id/tvRiverId"
+        android:layout_marginRight="75dp"
+        android:layout_alignTop="@id/tvName"
+        android:layout_alignBottom="@id/tvName"
+        tools:text="1/5"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        android:layout_alignBottom="@id/tvName"
+        android:layout_alignTop="@id/tvName"
+        android:layout_alignParentRight="true"
+        android:text="134"
+        android:id="@+id/tvRiverId"
+        />
+</RelativeLayout>

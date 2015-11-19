@@ -1,0 +1,45 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    >
+
+    <LinearLayout
+        android:id="@+id/linlaHeaderProgress"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone" >
+
+        <ProgressBar
+            android:id="@+id/pbProgressSpinner"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:theme="@style/Widget.AppCompat.ProgressBar">
+        </ProgressBar>
+
+        <TextView
+            android:id="@+id/progress_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:text="Trwa ładowanie danych..."
+            android:textColor="@android:color/black"
+            />
+    </LinearLayout>
+
+    <include layout="@layout/river_list_header"
+             android:id="@+id/header"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content"
+             android:layout_alignParentTop="true"/>
+
+<ListView
+    android:id="@+id/lvRivers"
+    android:layout_width="match_parent"
+    android:layout_below="@id/header"
+    android:layout_height="wrap_content"
+    />
+
+</RelativeLayout>
