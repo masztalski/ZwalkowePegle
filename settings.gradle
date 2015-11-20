@@ -1,1 +1,1 @@
-include ':pegle', ':webservice', ':domain'
+include ':pegle'
