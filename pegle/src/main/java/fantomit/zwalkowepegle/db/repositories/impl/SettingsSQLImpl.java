@@ -1,26 +1,27 @@
 package fantomit.zwalkowepegle.db.repositories.impl;
 
-import com.google.inject.Inject;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;
 
+import javax.inject.Inject;
+
 import fantomit.zwalkowepegle.DBmodels.Settings;
 import fantomit.zwalkowepegle.db.repositories.SettingsRepository;
 
 public class SettingsSQLImpl implements SettingsRepository {
 
-    private ConnectionSource connSource;
-    private SettingsRepository settingsRepository;
     private Dao<Settings, Integer> dao;
 
     @Inject
-    public SettingsSQLImpl(ConnectionSource connSource, SettingsRepository settingsRepository) throws SQLException {
-        this.connSource = connSource;
-        this.settingsRepository = settingsRepository;
-        this.dao = DaoManager.createDao(connSource, Settings.class);
+    public SettingsSQLImpl(ConnectionSource connSource) {
+        try {
+            this.dao = DaoManager.createDao(connSource, Settings.class);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

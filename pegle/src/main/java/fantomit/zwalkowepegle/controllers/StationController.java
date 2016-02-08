@@ -4,24 +4,25 @@ import android.util.Log;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
-import de.greenrobot.event.EventBus;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import fantomit.zwalkowepegle.APImodels.MyRecord;
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.BuildConfig;
+import fantomit.zwalkowepegle.Statics;
 import fantomit.zwalkowepegle.db.repositories.SettingsRepository;
 import fantomit.zwalkowepegle.db.repositories.StationRepository;
 import fantomit.zwalkowepegle.interfaces.StationDetailsInterface;
-import fantomit.zwalkowepegle.utils.RetroFitErrorHelper;
 import fantomit.zwalkowepegle.webservices.WrotkaWebService;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 @Singleton
 public class StationController {
@@ -31,20 +32,21 @@ public class StationController {
     private List<MyRecord> mPrzeplywHistoricStates;
 
     private StationDetailsInterface mView;
-    @Inject
     private StationRepository repoStacja;
-    @Inject
     private SettingsRepository repoSettings;
 
-    @Inject
     private WrotkaWebService stationHistoryWS;
-
-    @Inject
-    private EventBus eventBus;
 
     public String firstRecordDate;
 
     public boolean isTriggerFired = false;
+
+    @Inject
+    public StationController(WrotkaWebService stationHistoryWS, StationRepository repoStacja, SettingsRepository repoSettings) {
+        this.stationHistoryWS = stationHistoryWS;
+        this.repoStacja = repoStacja;
+        this.repoSettings = repoSettings;
+    }
 
     public void setView(StationDetailsInterface mView) {
         this.mView = mView;
@@ -52,49 +54,80 @@ public class StationController {
 
     public void loadStacja(String id) {
         mLevelHistoricStates = null;
-        mView.showProgressSpinner();
+        if (mView != null) mView.showProgressSpinner();
         mStacja = repoStacja.findById(id);
         Calendar todayDate = Calendar.getInstance();
+        Calendar beginDate = (Calendar) todayDate.clone();
         todayDate.add(Calendar.HOUR_OF_DAY, 1);
-        Calendar beginDate = Calendar.getInstance();
         beginDate.add(Calendar.MONTH, -1); //data miesi¹c wczeœniej
         beginDate.set(Calendar.HOUR_OF_DAY, 0);
         beginDate.set(Calendar.MINUTE, 0);
         beginDate.set(Calendar.SECOND, 0);
-        String today = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(todayDate.getTime());
-        String begin = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(beginDate.getTime());
-        loadHistoricStates("level", begin, today, true);
-        loadHistoricStates("przeplyw", begin, today, true);
-        mView.loadView(false);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String today = sdf.format(todayDate.getTime());
+        String begin = sdf.format(beginDate.getTime());
+        loadHistoricStates(Statics._LEVEL, begin, today, true);
+        loadHistoricStates(Statics._PRZEPLYW, begin, today, true);
+        if (mView != null) mView.loadView(false);
     }
 
-    public void loadHistoricStates(String kind, String begin, String end, boolean initLoading) {
-        Log.e("StationController", "LoadHistoricStates: " + kind);
-        Observable<List<MyRecord>> result = stationHistoryWS.getRecords(mStacja.getId(), kind, begin, end);
-        result.observeOn(AndroidSchedulers.mainThread()).subscribe(myRecords -> {
-            if (kind.equals("level")) {
-                Log.e("StationController", "Pobrane stany");
-                if(myRecords != null && !myRecords.isEmpty()) {
-                    if (mLevelHistoricStates != null) {
-                        this.mLevelHistoricStates.addAll(0, myRecords);
-                    } else {
-                        this.mLevelHistoricStates = myRecords;
-                    }
-                    mView.loadDataToLevelChart();
-                }
 
-            } else {
-                Log.e("StationController", "Pobrane przeplywy");
-                if(myRecords != null && !myRecords.isEmpty()) {
-                    if (mPrzeplywHistoricStates != null) {
-                        this.mPrzeplywHistoricStates.addAll(0, myRecords);
-                    } else {
-                        this.mPrzeplywHistoricStates = myRecords;
+    public void loadHistoricStates(String kind, String begin, String end, boolean initLoading) {
+        //Log.i("StationController", "LoadHistoricStates: " + kind);
+        Call<List<MyRecord>> result = stationHistoryWS.getRecords(mStacja.getId(), kind, begin, end);
+
+        result.enqueue(new Callback<List<MyRecord>>() {
+            @Override
+            public void onResponse(Call<List<MyRecord>> call, Response<List<MyRecord>> response) {
+                List<MyRecord> myRecords = response.body();
+                Log.i(getClass().getSimpleName(), kind + " Response parsed");
+                if (kind.equals(Statics._LEVEL)) {
+                    Log.i(getClass().getSimpleName(), "Pobrane stany");
+                    if (mView != null) mView.displayToast("Uda³o siê pobraæ dane");
+                    if (myRecords != null && !myRecords.isEmpty()) {
+                        if (mLevelHistoricStates != null) {
+                            mLevelHistoricStates.addAll(0, myRecords);
+                        } else {
+                            mLevelHistoricStates = myRecords;
+                        }
+                        if (mView != null) {
+                            mView.loadDataToLevelChart();
+                            mView.hideProgressSpinner();
+                        }
                     }
-                    mView.loadDataToPrzeplywChart();
+
+                } else {
+                    Log.i(getClass().getSimpleName(), "Pobrane przeplywy");
+                    if (mView != null) mView.displayToast("Uda³o siê pobraæ dane");
+                    if (myRecords != null && !myRecords.isEmpty()) {
+                        if (mPrzeplywHistoricStates != null) {
+                            mPrzeplywHistoricStates.addAll(0, myRecords);
+                        } else {
+                            mPrzeplywHistoricStates = myRecords;
+                        }
+                        if (mView != null) {
+                            mView.loadDataToPrzeplywChart();
+                            mView.hideProgressSpinner();
+                        }
+                    }
                 }
             }
-        }, new RetroFitErrorHelper(mView));
+
+            @Override
+            public void onFailure(Call<List<MyRecord>> call, Throwable throwable) {
+                if (mView != null) mView.hideProgressSpinner();
+                if (throwable != null) {
+                    if (throwable.getMessage() != null)
+                        Log.e("Retrofit", throwable.getMessage());
+                    if (mView != null) {
+                        if (throwable.getMessage() != null)
+                            mView.displayToast(throwable.getMessage());
+                        else
+                            mView.displayToast("B³¹d po³¹czenia - spróbuj wczytaæ stacjê ponownie");
+                    }
+                }
+            }
+        });
     }
 
     public Station getStacja() {
@@ -115,17 +148,19 @@ public class StationController {
         }
         mStacja.setIsFav(true);
         boolean status = repoStacja.createOrUpdate(mStacja);
+        if (mView != null) mView.displayToast(status ? "Dodano do ulubionych" : "Wyst¹pi³ b³¹d");
         if (!BuildConfig.DEBUG) {
             Answers.getInstance().logCustom(new CustomEvent("Favourites added")
                     .putCustomAttribute("Station", mStacja.getName()));
         }
-        Log.e("ADD ULUBIONE", status ? "Succes" : "Fail");
+        Log.i(getClass().getSimpleName(), "ADD ULUBIONE " + (status ? "Succes" : "Fail"));
     }
 
     public void deleteFromFavourite() {
         mStacja.setIsFav(false);
         boolean status = repoStacja.createOrUpdate(mStacja);
-        Log.e("DELETE ULUBIONE", status ? "Succes" : "Fail");
+        if (mView != null) mView.displayToast(status ? "Usuniêto z ulubionych" : "Wyst¹pi³ b³¹d");
+        Log.i(getClass().getSimpleName(), "DELETE ULUBIONE " + (status ? "Succes" : "Fail"));
     }
 
     public boolean pogodynkaStatesEnabled() {

@@ -13,14 +13,14 @@
         android:id="@+id/menu_edit"
         android:icon="@drawable/ic_pencil_white_36dp"
         android:orderInCategory="9"
-        android:title="Edytuj dane"
+        android:title="Edytuj stację"
         app:showAsAction="always">
         <menu>
             <item
                 android:id="@+id/action_edit"
                 android:icon="@drawable/ic_pencil_black_36dp"
                 android:orderInCategory="9"
-                android:title="Edytuj dane"
+                android:title="Edytuj powiadomienia"
                 app:showAsAction="always"/>
             <item
                 android:id="@+id/action_note"

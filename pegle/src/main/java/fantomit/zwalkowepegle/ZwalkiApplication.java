@@ -4,29 +4,46 @@ import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
 
+
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
 
-import fantomit.zwalkowepegle.di.ConnectionSourceModule;
-import fantomit.zwalkowepegle.di.EventBusModule;
-import fantomit.zwalkowepegle.di.WebServiceModule;
+import fantomit.zwalkowepegle.di.components.ApplicationComponent;
+import fantomit.zwalkowepegle.di.components.DaggerApplicationComponent;
+import fantomit.zwalkowepegle.di.modules.ApplicationModule;
+import fantomit.zwalkowepegle.di.modules.NetworkModule;
+import fantomit.zwalkowepegle.di.modules.WebServiceModule;
 import io.fabric.sdk.android.Fabric;
-import roboguice.RoboGuice;
 
 public class ZwalkiApplication extends Application {
+    public static final String POGODYNKA_API = "http://monitor.pogodynka.pl/api/";
+    public static final String WROTKA_API = "http://wrotka.pwr.edu.pl/";
 
-    public static final String API_ENDPOINT = "http://monitor.pogodynka.pl/api";
-    public static final String MY_API_SOURCE = "http://wrotka.pwr.edu.pl";
-    //public static final String BUGANALYTICS_KEY = "57a3c03
+    public static ApplicationComponent component;
+    public static ZwalkiApplication instance;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Fabric.with(this, new Crashlytics());
+        if (!BuildConfig.DEBUG) {
+            Fabric.with(this, new Crashlytics());
+        } else {
+           // Dagger2Metrics.enableCapturing(this);
+        }
+
+        component = DaggerApplicationComponent.builder()
+                .applicationModule(new ApplicationModule(this))
+                .networkModule(new NetworkModule())
+                .webServiceModule(new WebServiceModule())
+                .build();
+
+        instance = this;
 
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
-        RoboGuice.getOrCreateBaseApplicationInjector
-                (this, RoboGuice.DEFAULT_STAGE, RoboGuice.newDefaultRoboModule(this), new WebServiceModule(), new EventBusModule(), new ConnectionSourceModule(this));
+    }
+
+    public static ZwalkiApplication getApp() {
+        return instance;
     }
 }

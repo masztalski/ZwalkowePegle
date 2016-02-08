@@ -13,7 +13,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 
 import fantomit.zwalkowepegle.DBmodels.River;
 import fantomit.zwalkowepegle.R;
@@ -42,7 +41,6 @@ public class RiverListAdapter extends ArrayAdapter<River> {
             riverHolder.mRiver = (TextView) convertView.findViewById(R.id.tvName);
             riverHolder.mRiverId = (TextView) convertView.findViewById(R.id.tvRiverId);
             riverHolder.mRiverPlywalnosc = (TextView) convertView.findViewById(R.id.tvPlywalnoscRzeki);
-            //riverHolder.mTrend = (ImageView) convertView.findViewById(R.id.iconTrend);
 
             convertView.setTag(riverHolder);
         } else {
@@ -53,7 +51,6 @@ public class RiverListAdapter extends ArrayAdapter<River> {
 
         riverHolder.mRiverId.setText(r.getRiverId());
         riverHolder.mRiver.setText(r.getRiverShort());
-        //riverHolder.mRiverPlywalnosc.setVisibility(View.GONE);
         if (plywalnosc.get(r.getRiverId()) != null) {
             riverHolder.mRiverPlywalnosc.setText(Integer.toString(plywalnosc.get(r.getRiverId())) + "/" + Integer.toString(r.getConnectedStations().size()));
         } else {
@@ -76,8 +73,7 @@ public class RiverListAdapter extends ArrayAdapter<River> {
     }
 
     public boolean isPositionChecked(int position) {
-        Boolean result = mSelection.get(position);
-        return result == null ? false : result;
+        return mSelection.get(position);
     }
 
     public void removeSelection(int position) {
@@ -90,10 +86,10 @@ public class RiverListAdapter extends ArrayAdapter<River> {
         notifyDataSetChanged();
     }
 
-    public ArrayList<Integer> getSelection(){
+    public ArrayList<Integer> getSelection() {
         ArrayList<Integer> result = new ArrayList<>();
-        for(int i = 0; i < mSelection.size(); i++){
-            if(mSelection.valueAt(i)){
+        for (int i = 0; i < mSelection.size(); i++) {
+            if (mSelection.valueAt(i)) {
                 result.add(mSelection.keyAt(i));
             }
         }
@@ -114,6 +110,5 @@ public class RiverListAdapter extends ArrayAdapter<River> {
         public TextView mRiver;
         public TextView mRiverId;
         public TextView mRiverPlywalnosc;
-        //public ImageView mTrend;
     }
 }

@@ -6,8 +6,9 @@ import com.annimon.stream.Collectors;
 import com.annimon.stream.Stream;
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,58 +16,61 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.FutureTask;
 
-import de.greenrobot.event.EventBus;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.APImodels.StationListObject;
 import fantomit.zwalkowepegle.APImodels.WojStation;
 import fantomit.zwalkowepegle.BuildConfig;
 import fantomit.zwalkowepegle.DBmodels.River;
 import fantomit.zwalkowepegle.DBmodels.Settings;
-import fantomit.zwalkowepegle.R;
 import fantomit.zwalkowepegle.db.repositories.RiverRepository;
 import fantomit.zwalkowepegle.db.repositories.SettingsRepository;
 import fantomit.zwalkowepegle.db.repositories.StationRepository;
+import fantomit.zwalkowepegle.events.DataLoadedEvent;
+import fantomit.zwalkowepegle.events.UsuwanieRzekiEvent;
+import fantomit.zwalkowepegle.events.WojewodztwoChoosedEvent;
 import fantomit.zwalkowepegle.interfaces.MainActivityInterface;
-import fantomit.zwalkowepegle.utils.AktualizacjaEvent;
-import fantomit.zwalkowepegle.utils.RetroFitErrorHelper;
-import fantomit.zwalkowepegle.utils.UsuwanieRzekiEvent;
-import fantomit.zwalkowepegle.utils.WojewodztwoChoosedEvent;
-import fantomit.zwalkowepegle.webservices.ListaStacjiWebService;
-import fantomit.zwalkowepegle.webservices.StacjaWebService;
+import fantomit.zwalkowepegle.webservices.PogodynkaWebService;
 import fantomit.zwalkowepegle.webservices.WrotkaWebService;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 @Singleton
 public class MainController {
     private MainActivityInterface mView;
 
-    @Inject
-    private ListaStacjiWebService listaWS;
-    @Inject
-    private StacjaWebService stacjaWS;
-    @Inject
+    private PogodynkaWebService pogodynkaWS;
     private WrotkaWebService wrotkaWS;
-    @Inject
+
     private RiverRepository repoRiver;
-    @Inject
     private StationRepository repoStacja;
-    @Inject
     private SettingsRepository repoSettings;
 
-    @Inject
     private EventBus eventBus;
 
     public HashMap<String, Integer> plywalnoscRzek;
 
-    private List<StationListObject> mListaStacji;
     private List<WojStation> mWojewodzkieStacje;
     private List<River> mRivers;
-    private int howManyStationsTested = 0;
     private boolean isDivided = false;
     public boolean isSorted = false;
-    private String mWojewodztwo = "";
+
+
+    @Inject
+    public MainController(PogodynkaWebService listaStacjiWebService, WrotkaWebService wrotkaWebService, RiverRepository repoRiver, StationRepository repoStacja,
+                          SettingsRepository repoSettings, EventBus eventBus) {
+        this.pogodynkaWS = listaStacjiWebService;
+        this.wrotkaWS = wrotkaWebService;
+        this.repoRiver = repoRiver;
+        this.repoStacja = repoStacja;
+        this.repoSettings = repoSettings;
+        this.eventBus = eventBus;
+    }
 
     public void setView(MainActivityInterface mView) {
         this.mView = mView;
@@ -77,26 +81,26 @@ public class MainController {
         if (repoSettings.getSettings() == null) {
             repoSettings.createOrUpdate(new Settings());
         }
-        if(mView == null){
+        if (mView == null) {
             isSorted = false;
         }
     }
 
-    public void onEvent(WojewodztwoChoosedEvent event){
-        mWojewodztwo = event.wojewodztwo;
+    @Subscribe
+    public void handle(WojewodztwoChoosedEvent event) {
         getListaStacji();
     }
 
     public void getListaStacji() {
-        mView.showProgressSpinner();
+        if (mView != null) mView.showProgressSpinner();
         mRivers = repoRiver.getAll();
         if (repoSettings.getSettings() == null) {
-            mView.displayToast("B³¹d bazy danych. Odinstaluj i zainstaluj aplikacjê ponownie");
+            if (mView != null)
+                mView.displayToast("B³¹d bazy danych. Odinstaluj i zainstaluj aplikacjê ponownie");
             return;
         }
         if (mRivers == null || mRivers.isEmpty() || repoSettings.getSettings().isHasWojewodztwoChanged()) {
-            mWojewodztwo = repoSettings.getSettings().getWojewodztwo();
-            mRivers.clear();
+            mRivers = new ArrayList<>();
             repoRiver.deleteAll();
             isDivided = false;
             isSorted = false;
@@ -105,80 +109,42 @@ public class MainController {
             set.setHasWojewodztwoChanged(false);
             repoSettings.createOrUpdate(set);
 
-            Observable<List<WojStation>> result = wrotkaWS.getStations(set.getWojewodztwo());
+            Call<List<WojStation>> result = wrotkaWS.getStations(set.getWojewodztwo());
 
-            result.observeOn(AndroidSchedulers.mainThread()).subscribe(stations -> {
-                Log.i("Retrofit", "success");
-                howManyStationsTested = 0;
-                if (!isDivided) mWojewodzkieStacje = new ArrayList<>();
-                for(WojStation stacja : stations){
-                    saveStationToRepo(stacja);
-                    //getStacja(stacja.getStation_id(), stations.size());
+            result.enqueue(new Callback<List<WojStation>>() {
+                @Override
+                public void onResponse(Call<List<WojStation>> call, Response<List<WojStation>> response) {
+                    List<WojStation> stations = response.body();
+                    if (!isDivided) mWojewodzkieStacje = new ArrayList<>();
+                    for (WojStation stacja : stations) {
+                        saveStationToRepo(stacja);
+                    }
+                    sortRivers(mWojewodzkieStacje);
                 }
-                sortRivers(mWojewodzkieStacje);
-            }, new RetroFitErrorHelper(null));
+
+                @Override
+                public void onFailure(Call<List<WojStation>> call, Throwable throwable) {
+                    if (throwable != null) {
+                        if (throwable.getMessage() != null)
+                            Log.e("Retrofit", throwable.getMessage());
+                        if (mView != null) {
+                            if (throwable.getMessage() != null)
+                                mView.displayToast(throwable.getMessage());
+                            else mView.displayToast("B³¹d po³¹czenia");
+                        }
+                    }
+                }
+            });
         } else {
             isDivided = true;
             checkPlywalnosc();
         }
     }
 
-//    private void setWojewodztwo() {
-//        if (BuildConfig.DEBUG)
-//            Log.e("FANTOM", "Set " + repoSettings.getSettings().getWojewodztwo());
-//        howManyStationsTested = 0;
-//        if (mView != null)
-//            mView.displayProgress(R.string.msg_setWojewodztwo, null);
-//        Stream.of(mListaStacji)
-//                .forEach((StationListObject s) -> getStacja(s.getId()));
-//
-//        if (BuildConfig.DEBUG)
-//            Log.e("DOWNLOAD", "Downloaded " + Integer.toString(mListaStacji.size()) + " stations");
-//    }
-
-    public void getStacja(String id, int size ) {
-        Observable<Station> result = stacjaWS.getStacja(id);
-        if (!isDivided) mWojewodzkieStacje = new ArrayList<>();
-
-        result.observeOn(AndroidSchedulers.mainThread())
-                .subscribe(station -> {
-                    if (station != null && !isDivided) {
-                        howManyStationsTested++;
-                        if (mView != null)
-                            mView.displayProgress(0, "Stacja " + station.getName() + " dopasowana");
-
-
-                        if (howManyStationsTested == size) {
-                            sortRivers(mWojewodzkieStacje);
-                            if (BuildConfig.DEBUG)
-                                Log.e("TESTED", "Znaleziono: " + Integer.toString(mWojewodzkieStacje.size())
-                                        + " stacji dla woj. " + repoSettings.getSettings().getWojewodztwo());
-                        }
-                    }
-                }, new RetroFitErrorHelper(mView));
-    }
-
-    private void saveStationToRepo(WojStation wojStation){
+    private void saveStationToRepo(WojStation wojStation) {
         mWojewodzkieStacje.add(wojStation);
         Station s = repoStacja.findById(wojStation.getStation_id());
-//        if (s != null) {
-//            station.setIsFav(s.isFav());
-//            station.setIsUserCustomized(s.isUserCustomized());
-//            station.setNotifByPrzeplyw(s.isNotifByPrzeplyw());
-//            station.setNotifCheckedId(s.getNotifCheckedId());
-//            if (s.getDolnaGranicaPrzeplywu() != -1.0) {
-//                station.setDolnaGranicaPrzeplywu(s.getDolnaGranicaPrzeplywu());
-//            } else {
-//                station.setDolnaGranicaPrzeplywu(s.getLw_przeplyw() != -1.0 ? s.getLw_przeplyw() : s.getLowDischargeValue());
-//            }
-//            if (s.getDolnaGranicaPoziomu() != -1) {
-//                station.setDolnaGranicaPoziomu(s.getDolnaGranicaPoziomu());
-//            } else {
-//                Double temp = Double.valueOf(s.getStatus().getLowValue());
-//                station.setDolnaGranicaPoziomu(s.getLw_poziom() != -1 ? s.getLw_poziom() : temp.intValue());
-//            }
-//        } else
-        if(s == null){
+        if (s == null) {
             Station stacjaDB = new Station();
             stacjaDB.setId(wojStation.getStation_id());
             Double temp = Double.valueOf(wojStation.getLowValue());
@@ -189,12 +155,11 @@ public class MainController {
     }
 
     private void sortRivers(List<WojStation> stacje) {
-        Log.e("FANTOM", "sortRivers");
-        if (mView != null)
-            mView.displayProgress(R.string.msg_SortRivers, null);
-        if (stacje.isEmpty()) Log.e("FANTOM", "brak stacji");
+        Log.i(getClass().getSimpleName(), "sortRivers");
+        if (stacje.isEmpty()) Log.e(getClass().getSimpleName(), "Brak stacji");
         List<River> rzeki = new ArrayList<>();
         List<String> nazwyRzek = new ArrayList<>();
+
         FutureTask<List<River>> sorting = new FutureTask<>(() -> {
             Stream.of(stacje)
                     .forEach(stacja -> {
@@ -228,28 +193,26 @@ public class MainController {
             checkPlywalnosc();
         });
 
-
-
         nazwyRzek.clear();
-        if (BuildConfig.DEBUG) if (!rzeki.isEmpty()) Log.e("FANTOM", "sortRivers-Succes");
+        if (!rzeki.isEmpty()) Log.i(getClass().getSimpleName(), "sortRivers-Succes");
         if (BuildConfig.DEBUG)
-            Log.e("ILOSC RZEK w " + repoSettings.getSettings().getWojewodztwo(), Integer.toString(rzeki.size()));
+            Log.i(getClass().getSimpleName(), "ILOSC RZEK w " + repoSettings.getSettings().getWojewodztwo() + ": " + Integer.toString(rzeki.size()));
     }
-
 
     public List<River> getRivers() {
         return mRivers;
     }
 
-    public void onEvent(UsuwanieRzekiEvent event) {
+    @Subscribe
+    public void usunRzeke(UsuwanieRzekiEvent event) {
         boolean czyUsunac = event.czyUsunac();
         isSorted = false;
         if (czyUsunac) {
-            for(int pos : event.getRiverPos()){
+            for (int pos : event.getRiverPos()) {
                 repoRiver.delete(mRivers.get(pos));
             }
             mRivers = repoRiver.getAll();
-            mView.displayRivers();
+            if (mView != null) mView.displayRivers();
         }
     }
 
@@ -261,49 +224,68 @@ public class MainController {
         return repoSettings.getSettings().isHasWojewodztwoChanged();
     }
 
-    public void onEvent(AktualizacjaEvent event) {
-        if (!event.czyPobrac()) {
-            mView.displayAktualizacjaDialog();
-        }
+    @Subscribe
+    public void poPobraniuDanych(DataLoadedEvent event) {
+        checkPlywalnosc();
     }
 
     public void checkPlywalnosc() {
-        Log.e("Plywalnosc", "Rozpoczêto testowanie p³ywalnoœci");
+        Log.i(getClass().getSimpleName(), "Rozpoczêto testowanie p³ywalnoœci");
         long startTime = Calendar.getInstance().getTimeInMillis();
 
         plywalnoscRzek = new HashMap<>();
-        Observable<List<StationListObject>> result = listaWS.getListaStacji();
-        result.observeOn(AndroidSchedulers.mainThread()).subscribe(listaStacji -> {
-                    Log.e("PLYWALNOSC", "data received");
-                    Stream.of(mRivers)
-                            .forEach(river -> {
-                                int i = 0;
-                                List<StationListObject> filteredList = Stream.of(listaStacji)
-                                        .filter(s -> river.getConnectedStations().contains(s.getId()))
-                                        .collect(Collectors.toList());
-                                for (StationListObject station : filteredList) {
-                                    Station s = repoStacja.findById(station.getId());
-                                    if (s != null) {
-                                        s.setLan(station.getLangitude());
-                                        s.setLon(station.getLongitude());
-                                        repoStacja.createOrUpdate(s);
-                                        if (station.getPoziom() >= s.getDolnaGranicaPoziomu()) {
-                                            i++;
+        Call<List<StationListObject>> result = pogodynkaWS.getListaStacji();
+        result.enqueue(new Callback<List<StationListObject>>() {
+            @Override
+            public void onResponse(Call<List<StationListObject>> call, Response<List<StationListObject>> response) {
+                List<StationListObject> listaStacji = response.body();
+                Log.i(getClass().getSimpleName(), "data received");
+                Stream.of(mRivers)
+                        .distinct()
+                        .forEach(river -> {
+                            int i = 0;
+                            List<StationListObject> filteredList = Stream.of(listaStacji)
+                                    .filter(s -> river.getConnectedStations().contains(s.getId()))
+                                    .collect(Collectors.toList());
+                            for (StationListObject station : filteredList) {
+                                Station s = repoStacja.findById(station.getId());
+                                if (s != null) {
+                                    s.setLan(station.getLangitude());
+                                    s.setLon(station.getLongitude());
+                                    repoStacja.createOrUpdate(s);
+                                    if (station.getPoziom() >= s.getDolnaGranicaPoziomu()) {
+                                        i++;
+                                        if (plywalnoscRzek != null)
                                             plywalnoscRzek.put(river.getRiverId(), i);
-                                            // Log.e("PLYWALNOSC", river.getRiverName());
-                                        } else {
+                                        // Log.i("PLYWALNOSC", river.getRiverName());
+                                    } else {
+                                        if (plywalnoscRzek != null)
                                             plywalnoscRzek.put(river.getRiverId(), i);
-                                            //Log.e("PLYWALNOSC", river.getRiverName());
-                                        }
+                                        //Log.i("PLYWALNOSC", river.getRiverName());
                                     }
                                 }
-                            });
+                            }
+                        });
+                if (!BuildConfig.DEBUG)
                     Answers.getInstance().logCustom(new CustomEvent("P³ywalnoœæ")
-                    .putCustomAttribute("TIME", (Calendar.getInstance().getTimeInMillis() - startTime)/1000));
-                    Log.e("PLYWALNOSC", "completed");
-                    mView.displayRivers();
-                }, new RetroFitErrorHelper(mView)
-        );
+                            .putCustomAttribute("TIME", (Calendar.getInstance().getTimeInMillis() - startTime) / 1000));
+                Log.i(getClass().getSimpleName(), "P³ywalnoœæ testing completed");
+                if (mView != null) mView.displayRivers();
+            }
+
+            @Override
+            public void onFailure(Call<List<StationListObject>> call, Throwable throwable) {
+                if (throwable != null) {
+                    if (throwable.getMessage() != null) Log.e("Retrofit", throwable.getMessage());
+                    else Log.e("Retrofit", "B³¹d przy po³¹czeniu do pogodynki");
+                    if (mView != null) {
+                        if (throwable.getMessage() != null)
+                            mView.displayToast(throwable.getMessage());
+                        else mView.displayToast("B³¹d po³¹czenia");
+                    }
+                }
+            }
+        });
     }
 }
 

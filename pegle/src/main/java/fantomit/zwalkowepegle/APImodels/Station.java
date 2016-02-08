@@ -4,11 +4,12 @@ import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @DatabaseTable
-public class Station {
+public class Station implements Serializable {
     /*======API model========*/
     @DatabaseField(generatedId = false, id = true)
     private String id;
@@ -47,7 +48,7 @@ public class Station {
     @DatabaseField
     private boolean isByDefaultCustomized = false;
     @DatabaseField
-    private boolean notifByPrzeplyw = true;
+    private boolean notifByPrzeplyw = false;
     @DatabaseField
     private float lan;
     @DatabaseField
@@ -84,10 +85,21 @@ public class Station {
     private String notifHint = "LLW";
     @DatabaseField
     private int notifCheckedId = -1;
+    @DatabaseField
+    private boolean isVisible = true;
 
-    public Station(){}
+    public boolean isVisible() {
+        return isVisible;
+    }
 
-    public Station(String id){
+    public void setVisible(boolean visible) {
+        isVisible = visible;
+    }
+
+    public Station() {
+    }
+
+    public Station(String id) {
         this.setId(id);
     }
 

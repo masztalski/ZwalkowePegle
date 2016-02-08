@@ -16,8 +16,9 @@ import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
 
 import fantomit.zwalkowepegle.BuildConfig;
-import fantomit.zwalkowepegle.MainActivity;
 import fantomit.zwalkowepegle.R;
+import fantomit.zwalkowepegle.Statics;
+import fantomit.zwalkowepegle.StationDetails;
 
 public class NotificationReceiver extends BroadcastReceiver {
     public static final String _KEY = "notify";
@@ -32,7 +33,8 @@ public class NotificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle extras = intent.getExtras();
-        int id = Integer.parseInt(extras.getString(_ID));
+        String stationID = extras.getString(_ID);
+        int notifID = Integer.parseInt(stationID);
         String name = extras.getString(_NAME);
         String typ = extras.getString(_TYPE);
         double przeplyw = -1;
@@ -45,12 +47,14 @@ public class NotificationReceiver extends BroadcastReceiver {
             czyPoziom = true;
         }
 
-        if(!BuildConfig.DEBUG) {
+        if (!BuildConfig.DEBUG) {
             Answers.getInstance().logCustom(new CustomEvent("Notification sent")
                     .putCustomAttribute(name, (czyPoziom ? Integer.toString(poziom) + "cm" : Double.toString(przeplyw) + "m3/s") + "\n" + "dolna granica: " + typ));
         }
 
-        PendingIntent contentIntent = PendingIntent.getActivity(context, id, new Intent(context, MainActivity.class), 0);
+        Intent i = new Intent(context, StationDetails.class);
+        i.putExtra(Statics._STATION_ID, stationID);
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(context, notifID, i, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
@@ -59,7 +63,7 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setSmallIcon(R.drawable.ic_water_white_36dp)
                 .setContentTitle(name)
                 .setContentText(czyPoziom ? "Jest " + Integer.toString(poziom) + " cm" : "Jest " + Double.toString(przeplyw) + " m3/s")
-                .setContentIntent(contentIntent)
+                .setContentIntent(resultPendingIntent)
                 .setVibrate(pattern)
                 .setLights(Color.RED, 3000, 3000)
                 .setSound(alarmSound)
@@ -67,6 +71,6 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setAutoCancel(true);
 
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        mNotificationManager.notify(id, mBuilder.build());
+        mNotificationManager.notify(notifID, mBuilder.build());
     }
 }

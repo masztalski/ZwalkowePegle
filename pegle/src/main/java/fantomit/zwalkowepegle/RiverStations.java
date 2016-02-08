@@ -3,9 +3,8 @@ package fantomit.zwalkowepegle;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.view.Menu;
+import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -13,38 +12,38 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.inject.Inject;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.util.Collections;
 import java.util.Comparator;
 
-import de.greenrobot.event.EventBus;
+import javax.inject.Inject;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.adapters.StationListAdapter;
 import fantomit.zwalkowepegle.controllers.RiverStationsController;
-import fantomit.zwalkowepegle.dialogs.NoteDialog;
+import fantomit.zwalkowepegle.events.StationsLoadedEvent;
 import fantomit.zwalkowepegle.interfaces.RiverStationsInterface;
-import fantomit.zwalkowepegle.utils.StationsLoadedEvent;
-import roboguice.activity.RoboActionBarActivity;
-import roboguice.inject.InjectView;
 
-public class RiverStations extends RoboActionBarActivity implements RiverStationsInterface {
-
+public class RiverStations extends AppCompatActivity implements RiverStationsInterface {
     @Inject
-    private RiverStationsController mController;
+    RiverStationsController mController;
     private StationListAdapter mAdapter;
     @Inject
-    private EventBus eventBus;
+    EventBus eventBus;
 
-    @InjectView(R.id.lvRivers)
+    @Bind(R.id.lvRivers)
     ListView mStations;
-    @InjectView(R.id.linlaHeaderProgress)
-    private LinearLayout mProgressLayout;
+    @Bind(R.id.linlaHeaderProgress)
+    LinearLayout mProgressLayout;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    private void setupActivity() {
+        ZwalkiApplication.getApp().component.inject(this);
         setContentView(R.layout.simple_list);
+        ButterKnife.bind(this);
         mController.setView(this);
         if (!eventBus.isRegistered(this)) {
             eventBus.register(this);
@@ -52,8 +51,14 @@ public class RiverStations extends RoboActionBarActivity implements RiverStation
         findViewById(R.id.header).setVisibility(View.GONE);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.primary)));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        if (getIntent().getExtras().containsKey("RIVER") && savedInstanceState == null) {
-            mController.setRiverId(getIntent().getExtras().getInt("RIVER"));
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setupActivity();
+        if (getIntent().getExtras().containsKey(Statics._RIVER_ID) && savedInstanceState == null) {
+            mController.setRiverId(getIntent().getExtras().getInt(Statics._RIVER_ID));
             mController.loadStations();
             getSupportActionBar().setTitle(mController.getRiverName());
         } else if (savedInstanceState != null) {
@@ -61,16 +66,15 @@ public class RiverStations extends RoboActionBarActivity implements RiverStation
         }
         mStations.setOnItemClickListener((AdapterView<?> parent, View view, int position, long id) -> {
                     Intent i = new Intent(RiverStations.this, StationDetails.class);
-                    i.putExtra("STATION_ID", mController.getStations().get(position).getId());
+                    i.putExtra(Statics._STATION_ID, mController.getStations().get(position).getId());
                     startActivity(i);
                 }
         );
-
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
                 break;
@@ -93,19 +97,17 @@ public class RiverStations extends RoboActionBarActivity implements RiverStation
         mProgressLayout.setVisibility(View.GONE);
     }
 
-    public void onEvent(StationsLoadedEvent event) {
+    @Subscribe
+    public void poZaladowaniuStacji(StationsLoadedEvent event) {
         refreshList();
     }
 
     public void refreshList() {
         if (mController.getStations() != null && mController.getStations().size() > 0) {
-            Comparator<Station> RIVER_KM_ORDER = (Station object1, Station object2) -> {
-                int res = Double.compare(object2.getStatus().getRiverCourseKm(), object1.getStatus().getRiverCourseKm());
-                return res;
-            };
+            Comparator<Station> RIVER_KM_ORDER = (Station object1, Station object2) ->
+                    Double.compare(object2.getStatus().getRiverCourseKm(), object1.getStatus().getRiverCourseKm());
             Collections.sort(mController.getStations(), RIVER_KM_ORDER);
             mController.isSorted = true;
-
 
             if (mAdapter == null) {
                 mAdapter = new StationListAdapter(this, mController.getStations());

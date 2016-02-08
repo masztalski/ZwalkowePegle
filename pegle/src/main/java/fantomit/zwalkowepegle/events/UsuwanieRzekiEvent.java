@@ -1,4 +1,4 @@
-package fantomit.zwalkowepegle.utils;
+package fantomit.zwalkowepegle.events;
 
 import java.util.ArrayList;
 

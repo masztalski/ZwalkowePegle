@@ -12,12 +12,10 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by mmar12 on 2015-10-09.
- */
 public class FileDialog {
+    private static final String HOME = "==HOME==";
     private static final String PARENT_DIR = "..";
-    private final String TAG = getClass().getName();
+    private final String TAG = getClass().getSimpleName();
     private String[] fileList;
     private File currentPath;
 
@@ -39,6 +37,8 @@ public class FileDialog {
     public FileDialog(Activity activity, File path) {
         this.activity = activity;
         if (!path.exists()) path = Environment.getExternalStorageDirectory();
+//        String extPath = Environment.getExternalStorageDirectory().toString() + "/Android/obb/fantomit.zwalkowepegle";
+//        if(!path.exists()) path = new File(extPath);
         loadFileList(path);
     }
 
@@ -51,7 +51,7 @@ public class FileDialog {
         builder.setTitle(currentPath.getPath());
         if (selectDirectoryOption) {
             builder.setPositiveButton("Select directory", (DialogInterface dialog, int which) -> {
-                        Log.d(TAG, currentPath.getPath());
+                        Log.i(TAG, currentPath.getPath());
                         fireDirectorySelectedEvent(currentPath);
                     }
             );
@@ -118,6 +118,7 @@ public class FileDialog {
     private void loadFileList(File path) {
         this.currentPath = path;
         List<String> r = new ArrayList<String>();
+        r.add(HOME);
         if (path.exists()) {
             if (path.getParentFile() != null) r.add(PARENT_DIR);
             FilenameFilter filter = (File dir, String filename) -> {
@@ -139,6 +140,7 @@ public class FileDialog {
 
     private File getChosenFile(String fileChosen) {
         if (fileChosen.equals(PARENT_DIR)) return currentPath.getParentFile();
+        if (fileChosen.equals(HOME)) return Environment.getExternalStorageDirectory();
         else return new File(currentPath, fileChosen);
     }
 

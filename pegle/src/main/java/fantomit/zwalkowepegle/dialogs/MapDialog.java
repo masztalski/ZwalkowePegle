@@ -1,17 +1,12 @@
 package fantomit.zwalkowepegle.dialogs;
 
-import android.app.Dialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -23,10 +18,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import fantomit.zwalkowepegle.R;
-import roboguice.fragment.RoboDialogFragment;
+import fantomit.zwalkowepegle.Statics;
 
-public class MapDialog extends RoboDialogFragment implements OnMapReadyCallback {
+public class MapDialog extends AppCompatDialogFragment implements OnMapReadyCallback {
 
+    private static final float ZOOM = 12F;
     private float longitude;
     private float langitude;
     private String name;
@@ -42,9 +38,9 @@ public class MapDialog extends RoboDialogFragment implements OnMapReadyCallback 
         super.onViewCreated(view, savedInstanceState);
 
         if (getArguments() != null) {
-            longitude = getArguments().getFloat("LON");
-            langitude = getArguments().getFloat("LAN");
-            name = getArguments().getString("NAME");
+            longitude = getArguments().getFloat(Statics._LONGITUDE);
+            langitude = getArguments().getFloat(Statics._LANGITUDE);
+            name = getArguments().getString(Statics._STATION_NAME);
         }
         SupportMapFragment mapFragment = new SupportMapFragment();
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
@@ -55,12 +51,12 @@ public class MapDialog extends RoboDialogFragment implements OnMapReadyCallback 
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        if(langitude != 0.0 && longitude != 0.0) {
+        if (langitude != 0.0 && longitude != 0.0) {
             LatLng position = new LatLng(langitude, longitude);
             Marker marker = googleMap.addMarker(new MarkerOptions().position(position).title(name));
             marker.showInfoWindow();
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, 12F));
-        } else{
+            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(position, ZOOM));
+        } else {
             Toast.makeText(getActivity(), "Brak danych o lokalizacji", Toast.LENGTH_SHORT).show();
         }
     }

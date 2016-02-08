@@ -22,7 +22,8 @@
             android:checked="true"
             android:gravity="center"
             android:padding="5dp"
-            app:sw_thumbColor="@color/accent" />
+            app:sw_thumbColor="@color/accent"
+             />
 
         <TextView
             android:id="@+id/notif_hint"
@@ -167,6 +168,20 @@
             android:text="Zatwierdź zmiany"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textStyle="normal" />
+
+        <Button
+            android:id="@+id/dolnoslaskie"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/clearFav"
+            android:layout_alignRight="@id/clearFav"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:padding="5dp"
+            android:background="@drawable/button_effect"
+            android:layout_below="@id/apply"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:text="Stany charakterystyczne dla woj. Dolnośląskiego"/>
 
 
     </RelativeLayout>

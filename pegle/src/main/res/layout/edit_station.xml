@@ -14,6 +14,7 @@
         android:layout_alignBottom="@+id/notif_hint"
         android:gravity="center"
         android:padding="5dp"
+        android:checked = "true"
         app:sw_thumbColor="@color/accent"/>
 
     <TextView
@@ -23,7 +24,7 @@
         android:padding="5dp"
         android:layout_toRightOf="@id/notif_switcher"
         android:layout_marginLeft="5dp"
-        android:text="Powiadomiaj dla progowego przepływu"/>
+        android:text="Powiadomiaj dla progowego poziomu"/>
 
     <RadioGroup
         android:id="@+id/statesSwitcher"

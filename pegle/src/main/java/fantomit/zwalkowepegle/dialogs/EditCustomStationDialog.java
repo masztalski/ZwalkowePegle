@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -12,15 +13,18 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.inject.Inject;
 import com.rey.material.widget.Switch;
+
+import javax.inject.Inject;
 
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.R;
+import fantomit.zwalkowepegle.Statics;
+import fantomit.zwalkowepegle.ZwalkiApplication;
 import fantomit.zwalkowepegle.db.repositories.StationRepository;
-import roboguice.fragment.RoboDialogFragment;
 
-public class EditCustomStationDialog extends RoboDialogFragment {
+
+public class EditCustomStationDialog extends AppCompatDialogFragment {
 
     private Switch notifSwitcher;
     private Button bClear;
@@ -30,23 +34,19 @@ public class EditCustomStationDialog extends RoboDialogFragment {
     private boolean cleared = false;
 
     @Inject
-    private StationRepository repoStation;
+    StationRepository repoStation;
 
     private Station mStation;
-
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        ZwalkiApplication.getApp().component.inject(this);
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View rootView = inflater.inflate(R.layout.edit_station, null);
-        bClear = (Button) rootView.findViewById(R.id.bClear);
-        notifSwitcher = (Switch) rootView.findViewById(R.id.notif_switcher);
-        notifHint = (TextView) rootView.findViewById(R.id.notif_hint);
-        statesSwitcher = (RadioGroup) rootView.findViewById(R.id.statesSwitcher);
+        setupView(rootView);
 
-        String idStation = getArguments().getString("ID");
+        String idStation = getArguments().getString(Statics._STATION_ID);
         mStation = repoStation.findById(idStation);
         if (mStation.isNotifByPrzeplyw()) {
             notifSwitcher.setChecked(false);
@@ -54,6 +54,13 @@ public class EditCustomStationDialog extends RoboDialogFragment {
         } else {
             notifSwitcher.setChecked(true);
             notifHint.setText("Powiadomiaj dla progowego poziomu");
+        }
+
+        if (mStation.getNotifCheckedId() != -1) {
+            statesSwitcher.check(mStation.getNotifCheckedId());
+        } else {
+            statesSwitcher.check(R.id.lw);
+            mStation.setNotifCheckedId(R.id.lw);
         }
 
         notifSwitcher.setOnCheckedChangeListener((Switch view, boolean checked) -> {
@@ -67,6 +74,24 @@ public class EditCustomStationDialog extends RoboDialogFragment {
             }
         });
 
+        setListeners();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setView(rootView)
+                .setTitle("Edytuj powiadomienia dla stacji")
+                .setMessage("Wybierz wg czego chcesz byæ powiadamiany i od jakiego poziomu")
+                .setPositiveButton("Ok", (DialogInterface dialog, int which) -> {
+                            repoStation.createOrUpdate(mStation);
+                        }
+                )
+                .setNegativeButton("Anuluj", (DialogInterface dialog, int which) -> {
+                            dismiss();
+                        }
+                );
+        return builder.create();
+    }
+
+    private void setListeners() {
         bClear.setOnClickListener((View v) -> {
                     mStation.setIsByDefaultCustomized(false);
                     mStation.setIsUserCustomized(false);
@@ -74,14 +99,6 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                     Toast.makeText(getActivity(), "Przywrócono stany charakterystyczne na pobrane z serwera", Toast.LENGTH_SHORT);
                 }
         );
-
-        if (mStation.getNotifCheckedId() != -1) {
-            statesSwitcher.check(mStation.getNotifCheckedId());
-        } else {
-            statesSwitcher.check(R.id.lw);
-            mStation.setNotifCheckedId(R.id.lw);
-        }
-
 
         statesSwitcher.setOnCheckedChangeListener((RadioGroup group, int checkedId) -> {
                     mStation.setNotifCheckedId(checkedId);
@@ -143,18 +160,12 @@ public class EditCustomStationDialog extends RoboDialogFragment {
                     }
                 }
         );
+    }
 
-        builder.setView(rootView)
-                .setTitle("Edytuj Stacjê")
-                .setMessage("Wybierz wg czego chcesz byæ powiadamiany i od jakiego poziomu")
-                .setPositiveButton("Ok", (DialogInterface dialog, int which) -> {
-                            repoStation.createOrUpdate(mStation);
-                        }
-                )
-                .setNegativeButton("Anuluj", (DialogInterface dialog, int which) -> {
-                            dismiss();
-                        }
-                );
-        return builder.create();
+    private void setupView(View rootView) {
+        bClear = (Button) rootView.findViewById(R.id.bClear);
+        notifSwitcher = (Switch) rootView.findViewById(R.id.notif_switcher);
+        notifHint = (TextView) rootView.findViewById(R.id.notif_hint);
+        statesSwitcher = (RadioGroup) rootView.findViewById(R.id.statesSwitcher);
     }
 }
