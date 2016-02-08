@@ -18,11 +18,9 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private static final String DATABASE_NAME = "DOLNOSLASKIE.db";
     // any time you make changes to your database objects, you may have to
     // increase the database version
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 19;
 
     // the DAO object we use to access the SimpleData table
-    //private Dao<City, Integer > simpleDao = null;
-    //private RuntimeExceptionDao<City_db, String> simpleRuntimeDao = null;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

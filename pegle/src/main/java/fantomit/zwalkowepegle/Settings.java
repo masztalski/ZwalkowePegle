@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,50 +20,60 @@ import android.widget.Toast;
 
 import com.crashlytics.android.answers.Answers;
 import com.crashlytics.android.answers.CustomEvent;
-import com.google.inject.Inject;
 import com.rey.material.widget.Switch;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
+import javax.inject.Inject;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import fantomit.zwalkowepegle.controllers.SettingsController;
 import fantomit.zwalkowepegle.dialogs.AboutDialog;
 import fantomit.zwalkowepegle.dialogs.FileDialog;
+import fantomit.zwalkowepegle.interfaces.SettingsInterface;
 import fantomit.zwalkowepegle.receivers.FavsDownloadReceiver;
-import roboguice.activity.RoboActionBarActivity;
-import roboguice.inject.InjectView;
 
-public class Settings extends RoboActionBarActivity {
-    @InjectView(R.id.wojewodztwo_choose)
-    private Spinner spinWojewodztwa;
-    @InjectView(R.id.notification_switch)
-    private Switch notification_switch;
-    @InjectView(R.id.time_choose)
-    private Spinner spinTime;
-    @InjectView(R.id.clearFav)
-    private Button clearFavs;
-    @InjectView(R.id.apply)
-    private Button apply;
-    @InjectView(R.id.notif_hint)
-    private TextView notif_hint;
-    @InjectView(R.id.addData)
-    private Button addData;
-    @InjectView(R.id.defStates_hint)
-    private TextView defStates_hint;
-    @InjectView(R.id.defStates_switch)
-    private Switch defStates_switch;
+public class Settings extends AppCompatActivity implements SettingsInterface {
+    @Bind(R.id.wojewodztwo_choose)
+    Spinner spinWojewodztwa;
+    @Bind(R.id.notification_switch)
+    Switch notification_switch;
+    @Bind(R.id.time_choose)
+    Spinner spinTime;
+    @Bind(R.id.clearFav)
+    Button clearFavs;
+    @Bind(R.id.apply)
+    Button apply;
+    @Bind(R.id.notif_hint)
+    TextView notif_hint;
+    @Bind(R.id.addData)
+    Button addData;
+    @Bind(R.id.defStates_hint)
+    TextView defStates_hint;
+    @Bind(R.id.defStates_switch)
+    Switch defStates_switch;
+    @Bind(R.id.dolnoslaskie)
+    Button dolnoslaskie;
 
     @Inject
-    private SettingsController mController;
+    SettingsController mController;
+
+    private void setupActivity() {
+        ZwalkiApplication.getApp().component.inject(this);
+        setContentView(R.layout.settings);
+        mController.setView(this);
+        ButterKnife.bind(this);
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.primary)));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Ustawienia");
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.settings);
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.primary)));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Ustawienia");
+        setupActivity();
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.provinices_values, android.R.layout.simple_spinner_dropdown_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -73,14 +84,21 @@ public class Settings extends RoboActionBarActivity {
         spinTime.setAdapter(adapter2);
 
         setValuesFromDb();
+        if (!mController.wojewodztwo.equals("dolnoœl¹skie")) {
+            dolnoslaskie.setVisibility(View.GONE);
+        }
 
+        setupListeners();
+    }
 
+    private void setupListeners() {
         spinWojewodztwa.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 mController.wojewodztwo = (String) parent.getAdapter().getItem(position);
                 mController.wojPos = position;
-                if(!BuildConfig.DEBUG) {
+
+                if (!BuildConfig.DEBUG) {
                     Answers.getInstance().logCustom(new CustomEvent("Wczytanie województwa")
                             .putCustomAttribute("name", mController.wojewodztwo));
                 }
@@ -100,10 +118,10 @@ public class Settings extends RoboActionBarActivity {
                         mController.timeOfDownloading = 60;
                         break;
                     case 1: //2 godziny
-                        mController.timeOfDownloading = 2*60;
+                        mController.timeOfDownloading = 2 * 60;
                         break;
                     case 2: //3 godziny
-                        mController.timeOfDownloading = 3*60;
+                        mController.timeOfDownloading = 3 * 60;
                         break;
                     case 3: //1 dzieñ
                         mController.timeOfDownloading = 24 * 60;
@@ -120,27 +138,20 @@ public class Settings extends RoboActionBarActivity {
             }
         });
 
-        notification_switch.setOnCheckedChangeListener((Switch aSwitch, boolean checked) -> {
-                    if (checked) {
-                        spinTime.setEnabled(true);
-                        mController.notificationEnabled = true;
-                        notif_hint.setText("W³¹czone powiadomienia o ulubionych");
-                    } else {
-                        spinTime.setEnabled(false);
-                        mController.notificationEnabled = false;
-                        notif_hint.setText("Wy³¹czone powiadomienia o ulubionych");
-                    }
+        notification_switch.setOnCheckedChangeListener((Switch aSwitch, boolean notificationsEnabled) -> {
+                    spinTime.setEnabled(notificationsEnabled);
+                    mController.notificationEnabled = notificationsEnabled;
+                    notif_hint.setText(notificationsEnabled ? "W³¹czone powiadomienia o ulubionych" : "Wy³¹czone powiadomienia o ulubionych");
                 }
         );
 
         addData.setOnClickListener((View v) -> {
-                    FragmentManager fm = getSupportFragmentManager();
                     File path = new File(Environment.getExternalStorageDirectory() + "//DIR//");
                     FileDialog fileDialog = new FileDialog(Settings.this, path);
                     fileDialog.setFileEndsWith(".peg");
                     fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
                         public void fileSelected(File file) {
-                            Log.e(getClass().getName(), "selected file " + file.toString());
+                            Log.i(getClass().getSimpleName(), "selected file " + file.toString());
                             Toast.makeText(Settings.this, "Wczytano plik ze stanami charakterystycznymi. ZatwierdŸ zmiany aby za³adowaæ dane do stacji", Toast.LENGTH_SHORT).show();
                             mController.readFromFile(file);
                         }
@@ -167,14 +178,14 @@ public class Settings extends RoboActionBarActivity {
                 }
         );
 
-        defStates_switch.setOnCheckedChangeListener((Switch aSwitch, boolean checked) -> {
-            if (checked) {
-                defStates_hint.setText("W³¹czone stany charakterystyczne z Pogodynki");
-                mController.stanyPogodynkaEnabled = true;
-            } else {
-                defStates_hint.setText("Wy³¹czone stany charakterystyczne z Pogodynki");
-                mController.stanyPogodynkaEnabled = false;
-            }
+        defStates_switch.setOnCheckedChangeListener((Switch aSwitch, boolean stanyZPogodynkiEnabled) -> {
+            defStates_hint.setText(stanyZPogodynkiEnabled ? "W³¹czone stany charakterystyczne z Pogodynki" : "Wy³¹czone stany charakterystyczne z Pogodynki");
+            mController.stanyPogodynkaEnabled = stanyZPogodynkiEnabled;
+        });
+
+        dolnoslaskie.setOnClickListener((View v) -> {
+            mController.getStany();
+            Toast.makeText(Settings.this, "Wczytano plik ze stanami charakterystycznymi dla woj. dolnoœl¹skiego", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -202,6 +213,7 @@ public class Settings extends RoboActionBarActivity {
     private void setValuesFromDb() {
         fantomit.zwalkowepegle.DBmodels.Settings set = mController.getSettings();
         spinWojewodztwa.setSelection(set.getWojPos());
+        mController.wojewodztwo = (String) spinWojewodztwa.getSelectedItem();
         notification_switch.setChecked(set.isNotificationEnabled());
         defStates_switch.setChecked(set.isStanyPogodynkaEnabled());
         if (set.isStanyPogodynkaEnabled()) {
@@ -219,10 +231,10 @@ public class Settings extends RoboActionBarActivity {
             case 60: //1 godzina
                 spinTime.setSelection(0);
                 break;
-            case 2*60: //2 godziny
+            case 2 * 60: //2 godziny
                 spinTime.setSelection(1);
                 break;
-            case 3*60: //3 godziny
+            case 3 * 60: //3 godziny
                 spinTime.setSelection(2);
                 break;
             case 24 * 60: //1 dzieñ
@@ -233,5 +245,8 @@ public class Settings extends RoboActionBarActivity {
         }
     }
 
-
+    @Override
+    public void displayToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
 }

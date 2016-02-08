@@ -1,6 +1,6 @@
 package fantomit.zwalkowepegle.db.repositories.impl;
 
-import com.google.inject.Inject;
+
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.support.ConnectionSource;
@@ -9,20 +9,22 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import fantomit.zwalkowepegle.DBmodels.River;
 import fantomit.zwalkowepegle.db.repositories.RiverRepository;
 
 public class RiverSQLImpl implements RiverRepository {
 
-    private ConnectionSource connSource;
-    private RiverRepository rivers;
     private Dao<River, Integer> dao;
 
     @Inject
-    public RiverSQLImpl(ConnectionSource connSource, RiverRepository rivers) throws SQLException {
-        this.connSource = connSource;
-        this.rivers = rivers;
-        this.dao = DaoManager.createDao(connSource, River.class);
+    public RiverSQLImpl(ConnectionSource connSource) {
+        try {
+            this.dao = DaoManager.createDao(connSource, River.class);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

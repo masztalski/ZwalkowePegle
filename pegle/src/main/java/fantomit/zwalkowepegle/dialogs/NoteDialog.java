@@ -5,20 +5,21 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
-
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.R;
+import fantomit.zwalkowepegle.Statics;
+import fantomit.zwalkowepegle.ZwalkiApplication;
 import fantomit.zwalkowepegle.db.repositories.StationRepository;
-import roboguice.fragment.RoboDialogFragment;
 
-public class NoteDialog extends RoboDialogFragment {
+public class NoteDialog extends AppCompatDialogFragment {
 
     private String stationId;
     private String notes;
@@ -31,8 +32,9 @@ public class NoteDialog extends RoboDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        ZwalkiApplication.getApp().component.inject(this);
         if (getArguments() != null) {
-            stationId = getArguments().getString("ID");
+            stationId = getArguments().getString(Statics._STATION_ID);
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

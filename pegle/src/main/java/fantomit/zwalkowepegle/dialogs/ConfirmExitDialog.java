@@ -5,10 +5,9 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 
-import roboguice.fragment.RoboDialogFragment;
-
-public class ConfirmExitDialog extends RoboDialogFragment {
+public class ConfirmExitDialog extends AppCompatDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

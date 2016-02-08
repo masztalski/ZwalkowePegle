@@ -5,14 +5,11 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatDialogFragment;
 
 import fantomit.zwalkowepegle.R;
-import roboguice.fragment.RoboDialogFragment;
 
-/**
- * Created by mmar12 on 2015-10-08.
- */
-public class AboutDialog extends RoboDialogFragment {
+public class AboutDialog extends AppCompatDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
