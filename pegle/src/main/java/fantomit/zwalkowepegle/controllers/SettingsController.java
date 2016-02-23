@@ -110,6 +110,7 @@ public class SettingsController {
 
             @Override
             public void onFailure(Call<ResponseBody> call, Throwable t) {
+                t.printStackTrace();
                 if (t.getMessage() != null) Log.e("Retrofit", t.getMessage());
                 else Log.e("Retrofit", "B³¹d przy po³¹czeniu do wrotki");
                 if (mView != null) {

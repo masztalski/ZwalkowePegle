@@ -117,6 +117,7 @@ public class StationController {
             public void onFailure(Call<List<MyRecord>> call, Throwable throwable) {
                 if (mView != null) mView.hideProgressSpinner();
                 if (throwable != null) {
+                    throwable.printStackTrace();
                     if (throwable.getMessage() != null)
                         Log.e("Retrofit", throwable.getMessage());
                     if (mView != null) {

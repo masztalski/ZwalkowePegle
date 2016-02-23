@@ -98,7 +98,9 @@ public class RiverStationsController {
 
             @Override
             public void onFailure(Call<Station> call, Throwable throwable) {
+                if(mView != null) mView.hideProgressSpinner();
                 if (throwable != null) {
+                    throwable.printStackTrace();
                     if (throwable.getMessage() != null) Log.e("Retrofit", throwable.getMessage());
                     if (mView != null) {
                         if (throwable.getMessage() != null)

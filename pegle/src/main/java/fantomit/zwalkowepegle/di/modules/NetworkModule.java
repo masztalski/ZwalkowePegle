@@ -1,5 +1,7 @@
 package fantomit.zwalkowepegle.di.modules;
 
+import com.facebook.stetho.okhttp3.StethoInterceptor;
+
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Named;
@@ -33,12 +35,19 @@ public class NetworkModule {
 
     @Provides
     @Singleton
-    OkHttpClient providesOKClient(HttpLoggingInterceptor interceptor) {
+    StethoInterceptor providesStethoInterceptor(){
+        return new StethoInterceptor();
+    }
+
+    @Provides
+    @Singleton
+    OkHttpClient providesOKClient(HttpLoggingInterceptor interceptor, StethoInterceptor stethoInterceptor) {
         return new OkHttpClient.Builder()
                 .addInterceptor(interceptor)
+                .addNetworkInterceptor(stethoInterceptor)
                 .retryOnConnectionFailure(true)
-                .connectTimeout(6, TimeUnit.SECONDS)
-                .readTimeout(6, TimeUnit.SECONDS)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
                 .build();
     }
 

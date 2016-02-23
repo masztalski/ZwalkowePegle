@@ -34,6 +34,7 @@ import fantomit.zwalkowepegle.events.WojewodztwoChoosedEvent;
 import fantomit.zwalkowepegle.interfaces.MainActivityInterface;
 import fantomit.zwalkowepegle.webservices.PogodynkaWebService;
 import fantomit.zwalkowepegle.webservices.WrotkaWebService;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -114,17 +115,25 @@ public class MainController {
             result.enqueue(new Callback<List<WojStation>>() {
                 @Override
                 public void onResponse(Call<List<WojStation>> call, Response<List<WojStation>> response) {
-                    List<WojStation> stations = response.body();
-                    if (!isDivided) mWojewodzkieStacje = new ArrayList<>();
-                    for (WojStation stacja : stations) {
-                        saveStationToRepo(stacja);
+                    if(response.isSuccess()) {
+                        List<WojStation> stations = response.body();
+                        if (!isDivided) mWojewodzkieStacje = new ArrayList<>();
+                        for (WojStation stacja : stations) {
+                            saveStationToRepo(stacja);
+                        }
+                        sortRivers(mWojewodzkieStacje);
+                    } else {
+                        Log.e(MainController.class.getSimpleName(),String.valueOf(response.code()));
+                        Log.e(MainController.class.getSimpleName(), response.errorBody().toString());
+                        if (mView != null) mView.displayToast("Przekroczono czas po³¹czenia");
                     }
-                    sortRivers(mWojewodzkieStacje);
                 }
 
                 @Override
                 public void onFailure(Call<List<WojStation>> call, Throwable throwable) {
+                    if(mView != null) mView.hideProgressSpinner();
                     if (throwable != null) {
+                        throwable.printStackTrace();
                         if (throwable.getMessage() != null)
                             Log.e("Retrofit", throwable.getMessage());
                         if (mView != null) {
@@ -238,44 +247,53 @@ public class MainController {
         result.enqueue(new Callback<List<StationListObject>>() {
             @Override
             public void onResponse(Call<List<StationListObject>> call, Response<List<StationListObject>> response) {
-                List<StationListObject> listaStacji = response.body();
-                Log.i(getClass().getSimpleName(), "data received");
-                Stream.of(mRivers)
-                        .distinct()
-                        .forEach(river -> {
-                            int i = 0;
-                            List<StationListObject> filteredList = Stream.of(listaStacji)
-                                    .filter(s -> river.getConnectedStations().contains(s.getId()))
-                                    .collect(Collectors.toList());
-                            for (StationListObject station : filteredList) {
-                                Station s = repoStacja.findById(station.getId());
-                                if (s != null) {
-                                    s.setLan(station.getLangitude());
-                                    s.setLon(station.getLongitude());
-                                    repoStacja.createOrUpdate(s);
-                                    if (station.getPoziom() >= s.getDolnaGranicaPoziomu()) {
-                                        i++;
-                                        if (plywalnoscRzek != null)
-                                            plywalnoscRzek.put(river.getRiverId(), i);
-                                        // Log.i("PLYWALNOSC", river.getRiverName());
-                                    } else {
-                                        if (plywalnoscRzek != null)
-                                            plywalnoscRzek.put(river.getRiverId(), i);
-                                        //Log.i("PLYWALNOSC", river.getRiverName());
+                if (response.isSuccess()) {
+                    List<StationListObject> listaStacji = response.body();
+                    Log.i(getClass().getSimpleName(), "data received");
+                    Stream.of(mRivers)
+                            .distinct()
+                            .forEach(river -> {
+                                int i = 0;
+                                List<StationListObject> filteredList = Stream.of(listaStacji)
+                                        .filter(s -> river.getConnectedStations().contains(s.getId()))
+                                        .collect(Collectors.toList());
+                                for (StationListObject station : filteredList) {
+                                    Station s = repoStacja.findById(station.getId());
+                                    if (s != null) {
+                                        s.setLan(station.getLangitude());
+                                        s.setLon(station.getLongitude());
+                                        repoStacja.createOrUpdate(s);
+                                        if (station.getPoziom() >= s.getDolnaGranicaPoziomu()) {
+                                            i++;
+                                            if (plywalnoscRzek != null)
+                                                plywalnoscRzek.put(river.getRiverId(), i);
+                                            // Log.i("PLYWALNOSC", river.getRiverName());
+                                        } else {
+                                            if (plywalnoscRzek != null)
+                                                plywalnoscRzek.put(river.getRiverId(), i);
+                                            //Log.i("PLYWALNOSC", river.getRiverName());
+                                        }
                                     }
                                 }
-                            }
-                        });
-                if (!BuildConfig.DEBUG)
-                    Answers.getInstance().logCustom(new CustomEvent("P³ywalnoœæ")
-                            .putCustomAttribute("TIME", (Calendar.getInstance().getTimeInMillis() - startTime) / 1000));
-                Log.i(getClass().getSimpleName(), "P³ywalnoœæ testing completed");
-                if (mView != null) mView.displayRivers();
+                            });
+                    if (!BuildConfig.DEBUG)
+                        Answers.getInstance().logCustom(new CustomEvent("P³ywalnoœæ")
+                                .putCustomAttribute("TIME", (Calendar.getInstance().getTimeInMillis() - startTime) / 1000));
+                    Log.i(getClass().getSimpleName(), "P³ywalnoœæ testing completed");
+                    if (mView != null) mView.displayRivers();
+                } else {
+                    Log.e(MainController.class.getSimpleName(),String.valueOf(response.code()));
+                    Log.e(MainController.class.getSimpleName(), response.errorBody().toString());
+                    if (mView != null) mView.displayToast("Przekroczono czas po³¹czenia");
+                }
             }
 
             @Override
             public void onFailure(Call<List<StationListObject>> call, Throwable throwable) {
+                if(mView != null) mView.hideProgressSpinner();
                 if (throwable != null) {
+                    throwable.printStackTrace();
+                    if (throwable.getCause() != null && throwable.getCause().getMessage() != null) Log.e("Retrofit",throwable.getCause().getMessage());
                     if (throwable.getMessage() != null) Log.e("Retrofit", throwable.getMessage());
                     else Log.e("Retrofit", "B³¹d przy po³¹czeniu do pogodynki");
                     if (mView != null) {
