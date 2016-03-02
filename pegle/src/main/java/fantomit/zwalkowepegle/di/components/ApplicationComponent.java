@@ -16,6 +16,8 @@ import fantomit.zwalkowepegle.dialogs.ChooseWojewodztwoDialog;
 import fantomit.zwalkowepegle.dialogs.ConfirmDeleteDialog;
 import fantomit.zwalkowepegle.dialogs.EditCustomStationDialog;
 import fantomit.zwalkowepegle.dialogs.NoteDialog;
+import fantomit.zwalkowepegle.gcm.MyGcmListenerService;
+import fantomit.zwalkowepegle.gcm.RegistrationIntentService;
 import fantomit.zwalkowepegle.services.FavsDownloadService;
 
 @Singleton
@@ -38,4 +40,8 @@ public interface ApplicationComponent {
     void inject(ChooseWojewodztwoDialog dialog);
 
     void inject(FavsDownloadService service);
+
+    void inject(RegistrationIntentService service);
+
+    void inject(MyGcmListenerService service);
 }

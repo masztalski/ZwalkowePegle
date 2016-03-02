@@ -128,8 +128,8 @@ public class StationDetails extends AppCompatActivity implements StationDetailsI
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_station, menu);
         mFavButton = menu.findItem(R.id.action_favourite);
-        mFavButton.setIcon(mController.isStationFav() ? R.drawable.ic_star_white_36dp : R.drawable.ic_star_outline_white_36dp);
-        Log.i(getClass().getSimpleName(), "Stacja " + mController.getStacja().getName() + (mController.isStationFav() ? " ULUBIONA" : " NIE ULUBIONA"));
+        mFavButton.setIcon(mController.isStationFav() ? R.drawable.star_selector_filled : R.drawable.star_selector_white);
+        Log.i(StationDetails.class.getSimpleName(), "Stacja " + mController.getStacja().getName() + "-" + mController.getStacja().getId() + (mController.isStationFav() ? " ULUBIONA" : " NIE ULUBIONA"));
         return true;
     }
 
@@ -144,11 +144,11 @@ public class StationDetails extends AppCompatActivity implements StationDetailsI
             case R.id.action_favourite:
                 if (mController.isStationFav()) {
                     mController.deleteFromFavourite();
-                    item.setIcon(R.drawable.ic_star_outline_white_36dp);
+                    item.setIcon(R.drawable.star_outline_white);
                     Toast.makeText(this, "Usuniêto z ulubionych", Toast.LENGTH_SHORT).show();
                 } else {
                     mController.addToFavourite();
-                    item.setIcon(R.drawable.ic_star_white_36dp);
+                    item.setIcon(R.drawable.star_selector_filled);
                     Toast.makeText(this, "Dodano do ulubionych", Toast.LENGTH_SHORT).show();
                 }
                 break;
@@ -198,12 +198,18 @@ public class StationDetails extends AppCompatActivity implements StationDetailsI
 
     @Override
     public void loadView(boolean loadExistingData) {
-        Log.i(getClass().getSimpleName(), mController.getStacja().getName() + " - loadView");
-        if (mController == null || mController.getStacja() == null) {
+        if (mController == null || mController.getStacja() == null || mLevelSwitches == null) {
             Toast.makeText(this, "Wyst¹pi³ nieznany b³¹d. Powiadom Developera o nazwie stacji/rzeki gdzie wyst¹pi³ b³¹d", Toast.LENGTH_SHORT).show();
             return;
         }
+        Log.i(getClass().getSimpleName(), mController.getStacja().getName() != null ? mController.getStacja().getName() + " - loadView" : "Invalid station - loadView");
 
+        if (mController.getStacja().getLw_poziom() == -1 || mController.getStacja().getStatus().getLowValue() == 0) {
+            mLevelSwitches.findViewById(R.id.lw_level).setVisibility(View.GONE);
+        }
+        if (mController.getStacja().getLw_przeplyw() == -1 || mController.getStacja().getLowDischargeValue() == 0.0) {
+            mPrzeplywSwitches.findViewById(R.id.lw_przeplyw).setVisibility(View.GONE);
+        }
         if (mController.getStacja().getMw2_poziom() == -1) {
             mLevelSwitches.findViewById(R.id.mw2_level).setVisibility(View.GONE);
         }
@@ -244,13 +250,17 @@ public class StationDetails extends AppCompatActivity implements StationDetailsI
 
         String trend = mController.getStacja().getTrend();
         if (trend.equals("const")) {
-            mTrend.setImageResource(R.drawable.ic_trending_neutral_black_48dp);
+            mTrend.setImageResource(R.drawable.trending_neutral);
+            mTrend.setMinimumHeight(48);
         } else if (trend.equals("down")) {
-            mTrend.setImageResource(R.drawable.ic_trending_down_black_48dp);
+            mTrend.setImageResource(R.drawable.trending_down);
+            mTrend.setMinimumHeight(48);
         } else if (trend.equals("up")) {
-            mTrend.setImageResource(R.drawable.ic_trending_up_black_48dp);
+            mTrend.setImageResource(R.drawable.trending_up);
+            mTrend.setMinimumHeight(48);
         } else {
-            mTrend.setImageResource(R.drawable.ic_help_black_36dp);
+            mTrend.setImageResource(R.drawable.help_black);
+            mTrend.setMinimumHeight(36);
         }
         mLevelChart.setNoDataText(getString(R.string.no_data_msg));
         mPrzeplywChart.setNoDataText(getString(R.string.no_data_msg));

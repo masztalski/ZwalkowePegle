@@ -6,6 +6,6 @@
     <item android:id="@+id/action_about"
         android:title="About"
         android:orderInCategory="10"
-        android:icon="@drawable/ic_help_white_36dp"
+        android:icon="@drawable/help_selector"
         app:showAsAction="always"/>
 </menu>

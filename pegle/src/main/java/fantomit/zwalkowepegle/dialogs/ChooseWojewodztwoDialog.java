@@ -7,10 +7,14 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDialogFragment;
 
+import com.crashlytics.android.answers.Answers;
+import com.crashlytics.android.answers.CustomEvent;
+
 import org.greenrobot.eventbus.EventBus;
 
 import javax.inject.Inject;
 
+import fantomit.zwalkowepegle.BuildConfig;
 import fantomit.zwalkowepegle.DBmodels.Settings;
 import fantomit.zwalkowepegle.R;
 import fantomit.zwalkowepegle.ZwalkiApplication;
@@ -31,7 +35,6 @@ public class ChooseWojewodztwoDialog extends AppCompatDialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         ZwalkiApplication.getApp().component.inject(this);
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         set = repoSettings.getSettings();
         if (set != null) {
             wojewodztwo = set.getWojewodztwo();
@@ -45,17 +48,23 @@ public class ChooseWojewodztwoDialog extends AppCompatDialogFragment {
             }
         }
 
-        builder.setSingleChoiceItems(R.array.provinices_values, choicedItem, (DialogInterface dialog, int which) -> {
-                    wojewodztwo = wojewodztwa[which];
-                }
-        );
-        builder.setPositiveButton("Ok", (DialogInterface dialog, int which) -> {
-                    set.setWojewodztwo(wojewodztwo);
-                    set.setHasWojewodztwoChanged(true);
-                    repoSettings.createOrUpdate(set);
-                    EventBus.getDefault().post(new WojewodztwoChoosedEvent(wojewodztwo));
-                }
-        );
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder
+                .setSingleChoiceItems(R.array.provinices_values, choicedItem, (DialogInterface dialog, int which) -> {
+                            wojewodztwo = wojewodztwa[which];
+                        }
+                )
+                .setPositiveButton("Ok", (DialogInterface dialog, int which) -> {
+                            set.setWojewodztwo(wojewodztwo);
+                            set.setHasWojewodztwoChanged(true);
+                            repoSettings.createOrUpdate(set);
+                            if (!BuildConfig.DEBUG) {
+                                Answers.getInstance().logCustom(new CustomEvent("Pierwsze województwo")
+                                        .putCustomAttribute("name", wojewodztwo));
+                            }
+                            EventBus.getDefault().post(new WojewodztwoChoosedEvent(wojewodztwo));
+                        }
+                );
         return builder.create();
     }
 }

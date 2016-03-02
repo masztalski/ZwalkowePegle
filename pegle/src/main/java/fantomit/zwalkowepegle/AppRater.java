@@ -1,24 +1,25 @@
 package fantomit.zwalkowepegle;
 
-import android.app.Dialog;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.support.v4.app.FragmentManager;
+import android.widget.Toast;
+
+import fantomit.zwalkowepegle.dialogs.AppRaterDialog;
 
 public class AppRater {
-    private final static String APP_TITLE = "Zwa³kowe Pegle";
-    private final static String APP_PNAME = "fantomit.zwalkowepegle";
-
     private final static int DAYS_UNTIL_PROMPT = 3;
     private final static int LAUNCHES_UNTIL_PROMPT = 7;
 
-    public static void app_launched(Context mContext) {
+    public static void app_launched(Context mContext, FragmentManager fm) {
+        if(mContext == null){
+            return;
+        }
         SharedPreferences prefs = mContext.getSharedPreferences("apprater", 0);
+        if(prefs == null) {
+            Toast.makeText(mContext, "Wyst¹pi³ b³¹d w AppRater - powiadom developera", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (prefs.getBoolean("dontshowagain", false)) {
             return;
         }
@@ -40,75 +41,11 @@ public class AppRater {
         if (launch_count >= LAUNCHES_UNTIL_PROMPT) {
             if (System.currentTimeMillis() >= date_firstLaunch +
                     (DAYS_UNTIL_PROMPT * 24 * 60 * 60 * 1000)) {
-                showRateDialog(mContext, editor);
+                AppRaterDialog dialog = new AppRaterDialog();
+                dialog.setEditor(editor);
+                dialog.show(fm, "AppRater Dialog");
             }
         }
-
         editor.commit();
-    }
-
-    public static void showRateDialog(final Context mContext, final SharedPreferences.Editor editor) {
-        final Dialog dialog = new Dialog(mContext);
-        dialog.setTitle("Oceñ " + APP_TITLE);
-
-        LinearLayout ll = new LinearLayout(mContext);
-        ll.setOrientation(LinearLayout.VERTICAL);
-
-        TextView tv = new TextView(mContext);
-        tv.setText("Jeœli lubisz " + APP_TITLE + ", proszê poœwiêæ chwilê na ich ocenê. Dziêki za wsparcie!");
-        tv.setWidth(240);
-        tv.setPadding(10, 10, 10, 15);
-        ll.addView(tv);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                500,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(15, 5, 10, 5);
-
-        Button b1 = new Button(mContext);
-        b1.setBackgroundResource(R.drawable.button_effect);
-        b1.setPadding(10, 10, 10, 10);
-        b1.setLayoutParams(params);
-        b1.setText("Oceñ " + APP_TITLE);
-        b1.setOnClickListener((View v) -> {
-                    mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + APP_PNAME)));
-                    if (editor != null) {
-                        editor.putBoolean("dontshowagain", true);
-                        editor.commit();
-                    }
-                    dialog.dismiss();
-                }
-        );
-        ll.addView(b1);
-
-        Button b2 = new Button(mContext);
-        b2.setBackgroundResource(R.drawable.button_effect);
-        b2.setPadding(10, 10, 10, 10);
-        b2.setLayoutParams(params);
-        b2.setText("Przypomnij póŸniej");
-        b2.setOnClickListener((View v) -> {
-                    dialog.dismiss();
-                }
-        );
-        ll.addView(b2);
-
-        Button b3 = new Button(mContext);
-        b3.setBackgroundResource(R.drawable.button_effect);
-        b3.setPadding(10, 10, 10, 10);
-        b3.setLayoutParams(params);
-        b3.setText("Nie, dziêki");
-        b3.setOnClickListener((View v) -> {
-                    if (editor != null) {
-                        editor.putBoolean("dontshowagain", true);
-                        editor.commit();
-                    }
-                    dialog.dismiss();
-                }
-        );
-        ll.addView(b3);
-
-        dialog.setContentView(ll);
-        dialog.show();
     }
 }

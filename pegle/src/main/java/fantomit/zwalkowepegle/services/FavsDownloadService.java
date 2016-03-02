@@ -90,7 +90,7 @@ public class FavsDownloadService extends Service {
                             public void onResponse(Call<Station> call, Response<Station> response) {
                                 Station station = response.body();
                                 //jak spe³nione warunki to ustaw powiadomienie
-                                Log.i(getClass().getSimpleName(), "Pobrano stacje ulubion¹");
+                                Log.i(FavsDownloadService.class.getSimpleName(), "Pobrano stacje ulubion¹");
                                 Station s = repoStacja.findById(station.getId());
                                 if (s != null) {
                                     station.setIsFav(s.isFav());

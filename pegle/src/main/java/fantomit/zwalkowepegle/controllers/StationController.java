@@ -80,11 +80,11 @@ public class StationController {
             @Override
             public void onResponse(Call<List<MyRecord>> call, Response<List<MyRecord>> response) {
                 List<MyRecord> myRecords = response.body();
-                Log.i(getClass().getSimpleName(), kind + " Response parsed");
+                Log.i(StationController.class.getSimpleName(), kind + " Response parsed");
                 if (kind.equals(Statics._LEVEL)) {
-                    Log.i(getClass().getSimpleName(), "Pobrane stany");
-                    if (mView != null) mView.displayToast("Uda³o siê pobraæ dane");
+                    Log.i(StationController.class.getSimpleName(), "Pobrane stany");
                     if (myRecords != null && !myRecords.isEmpty()) {
+                        if (mView != null) mView.displayToast("Uda³o siê pobraæ historiê poziomów rzeki");
                         if (mLevelHistoricStates != null) {
                             mLevelHistoricStates.addAll(0, myRecords);
                         } else {
@@ -94,12 +94,17 @@ public class StationController {
                             mView.loadDataToLevelChart();
                             mView.hideProgressSpinner();
                         }
+                    }  else {
+                        if (mView != null){
+                            mView.displayToast("Wybrana stacja nie posiada historii poziomów rzeki");
+                            mView.hideProgressSpinner();
+                        }
                     }
 
                 } else {
-                    Log.i(getClass().getSimpleName(), "Pobrane przeplywy");
-                    if (mView != null) mView.displayToast("Uda³o siê pobraæ dane");
+                    Log.i(StationController.class.getSimpleName(), "Pobrane przeplywy");
                     if (myRecords != null && !myRecords.isEmpty()) {
+                        if (mView != null) mView.displayToast("Uda³o siê pobraæ historiê przep³ywów rzeki");
                         if (mPrzeplywHistoricStates != null) {
                             mPrzeplywHistoricStates.addAll(0, myRecords);
                         } else {
@@ -107,6 +112,11 @@ public class StationController {
                         }
                         if (mView != null) {
                             mView.loadDataToPrzeplywChart();
+                            mView.hideProgressSpinner();
+                        }
+                    } else {
+                        if (mView != null){
+                            mView.displayToast("Wybrana stacja nie posiada historii przep³ywów rzeki");
                             mView.hideProgressSpinner();
                         }
                     }

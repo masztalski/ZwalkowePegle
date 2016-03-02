@@ -22,6 +22,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import fantomit.zwalkowepegle.APImodels.GCM;
 import fantomit.zwalkowepegle.APImodels.Station;
 import fantomit.zwalkowepegle.DBmodels.Settings;
 import fantomit.zwalkowepegle.db.repositories.SettingsRepository;
@@ -175,4 +176,5 @@ public class SettingsController {
     public void setView(SettingsInterface view) {
         this.mView = view;
     }
+
 }

@@ -5,26 +5,26 @@
     tools:context=".StationDetails">
     <item
         android:id="@+id/action_map"
-        android:icon="@drawable/ic_map_white_36dp"
+        android:icon="@drawable/map_selector"
         android:orderInCategory="7"
         android:title="Pokaż na mapie"
         app:showAsAction="always" />
     <item
         android:id="@+id/menu_edit"
-        android:icon="@drawable/ic_pencil_white_36dp"
+        android:icon="@drawable/pencil_selector_white"
         android:orderInCategory="9"
         android:title="Edytuj stację"
         app:showAsAction="always">
         <menu>
             <item
                 android:id="@+id/action_edit"
-                android:icon="@drawable/ic_pencil_black_36dp"
+                android:icon="@drawable/pencil_selector_black"
                 android:orderInCategory="9"
                 android:title="Edytuj powiadomienia"
                 app:showAsAction="always"/>
             <item
                 android:id="@+id/action_note"
-                android:icon="@drawable/ic_clipboard_text_black_36dp"
+                android:icon="@drawable/clipboard_selector"
                 android:orderInCategory="8"
                 android:title="Zrób notatkę"
                 app:showAsAction="always" />
@@ -33,7 +33,7 @@
         </item>
     <item
         android:id="@+id/action_favourite"
-        android:icon="@drawable/ic_star_outline_white_36dp"
+        android:icon="@drawable/star_selector_white"
         android:orderInCategory="10"
         android:title="Ulubione"
         app:showAsAction="always" />

@@ -3,7 +3,6 @@ package fantomit.zwalkowepegle;
 import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
-import com.facebook.stetho.Stetho;
 
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -26,8 +25,6 @@ public class ZwalkiApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        Stetho.initializeWithDefaults(this);
         if (!BuildConfig.DEBUG) {
             Fabric.with(this, new Crashlytics());
         }

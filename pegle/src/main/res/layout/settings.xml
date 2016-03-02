@@ -184,6 +184,8 @@
             android:text="Stany charakterystyczne dla woj. Dolnośląskiego"/>
 
 
+
+
     </RelativeLayout>
 
 </ScrollView>

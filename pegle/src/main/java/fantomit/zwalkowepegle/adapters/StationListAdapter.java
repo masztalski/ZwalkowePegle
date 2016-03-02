@@ -63,13 +63,13 @@ public class StationListAdapter extends ArrayAdapter<Station> {
             riverHolder.mLevel.setTextColor(ContextCompat.getColor(getContext(), R.color.unknown));
         }
         if (trend.equals("const")) {
-            riverHolder.mTrend.setImageResource(R.drawable.ic_trending_neutral_black_48dp);
+            riverHolder.mTrend.setImageResource(R.drawable.trending_neutral);
         } else if (trend.equals("down")) {
-            riverHolder.mTrend.setImageResource(R.drawable.ic_trending_down_black_48dp);
+            riverHolder.mTrend.setImageResource(R.drawable.trending_down);
         } else if (trend.equals("up")) {
-            riverHolder.mTrend.setImageResource(R.drawable.ic_trending_up_black_48dp);
+            riverHolder.mTrend.setImageResource(R.drawable.trending_up);
         } else {
-            riverHolder.mTrend.setImageResource(R.drawable.ic_help_black_36dp);
+            riverHolder.mTrend.setImageResource(R.drawable.help_black);
         }
 
         return convertView;

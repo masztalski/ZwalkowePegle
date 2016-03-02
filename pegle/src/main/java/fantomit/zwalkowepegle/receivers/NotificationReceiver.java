@@ -1,6 +1,5 @@
 package fantomit.zwalkowepegle.receivers;
 
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -67,7 +66,6 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setVibrate(pattern)
                 .setLights(Color.RED, 3000, 3000)
                 .setSound(alarmSound)
-                .setDefaults(Notification.DEFAULT_VIBRATE | Notification.DEFAULT_SOUND)
                 .setAutoCancel(true);
 
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

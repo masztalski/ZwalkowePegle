@@ -8,3 +8,5 @@
 .idea/
 ZwalkowePegle.iml
 app/app.iml
+*.apk
+*.iml
